@@ -93,6 +93,7 @@ Options:
 	}
 
 	post := flag.String("d", "", "JSON for POST or PUT data")
+	verbose := flag.Int("v", 0, "Verbosity level (1 for debug)")
 	flag.Parse()
 
 	if len(flag.Args()) != 2 {
@@ -110,8 +111,9 @@ Options:
 		perror(fmt.Sprintf("can't use service: %s\n", err.Error()))
 	}
 
-	// FIXME: set an option
-	service.Option(mango.Verbosity(mango.Debug))
+	if *verbose == 1 {
+		service.Option(mango.Verbosity(mango.Debug))
+	}
 
 	action := flag.Arg(0)
 	switch action {
