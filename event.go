@@ -44,6 +44,7 @@ const (
 
 // Events returns a list of all financial events. This include PayIns, PayOuts and
 // transfers.
+//
 // TODO: add support for pagination and date range.
 func (m *MangoPay) Events() (EventList, error) {
 	es := EventList{}

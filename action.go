@@ -9,6 +9,7 @@ type MangoAction int
 const (
 	ActionEvents MangoAction = iota
 	ActionCreateNaturalUser
+	ActionEditNaturalUser
 
 	/*
 		ActionCreateUser MangoAction = iota

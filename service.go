@@ -43,10 +43,12 @@ var rootURLs = map[ExecEnvironment]string{
 
 // The Mangopay service.
 type MangoPay struct {
-	clientId string // MangoPay partner ID
-	password string
-	env      ExecEnvironment // Live or testing env
-	rootURL  *url.URL        // Base API URL for the current execution environment
+	clientId   string // MangoPay partner ID
+	password   string
+	env        ExecEnvironment // Live or testing env
+	rootURL    *url.URL        // Base API URL for the current execution environment
+	verbosity  Level
+	authMethod AuthMode
 }
 
 // MangoPay object identity data.
@@ -55,14 +57,22 @@ type Identity struct {
 	CreationDate, UpdateDate int
 }
 
-// NewMangoPay creates a suitable environment for sending accessing
-// the web service.
+// NewMangoPay creates a suitable environment for accessing
+// the web service. Default verbosity level is set to Info, default authentication
+// mode to BasicAuth. They can be changed through the use of Option().
 func NewMangoPay(clientId, password string, env ExecEnvironment) (*MangoPay, error) {
 	u, err := url.Parse(rootURLs[env])
 	if err != nil {
 		return nil, err
 	}
-	return &MangoPay{clientId, password, env, u}, nil
+	return &MangoPay{clientId, password, env, u, Info, BasicAuth}, nil
+}
+
+// Option set various options like verbosity etc.
+func (m *MangoPay) Option(opts ...option) {
+	for _, opt := range opts {
+		opt(m)
+	}
 }
 
 /*
@@ -161,7 +171,6 @@ func (s *MangoPay) request(ma MangoAction, data JsonObject) (*http.Response, err
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(uri)
 
 	// Create a request with body
 	body, err := json.Marshal(data)
@@ -180,6 +189,21 @@ func (s *MangoPay) request(ma MangoAction, data JsonObject) (*http.Response, err
 
 	// Post the data
 	req.Header.Set("Content-Type", "application/json")
+
+	if s.verbosity == Debug {
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>> DEBUG REQUEST")
+		fmt.Printf("%s %s\n\n", req.Method, req.URL.String())
+		for k, v := range req.Header {
+			for _, j := range v {
+				fmt.Printf("%s: %v\n", k, j)
+			}
+		}
+		fmt.Printf("\n%s\n", string(body))
+		fmt.Println("\nSending request ...")
+		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG REQUEST")
+	}
+
+	// Send request
 	resp, err := http.DefaultClient.Do(req)
 
 	// Handle reponse status code
@@ -190,7 +214,7 @@ func (s *MangoPay) request(ma MangoAction, data JsonObject) (*http.Response, err
 			return nil, err
 		}
 		if msg, ok := j["Message"]; ok {
-			err = errors.New(msg.(string))
+			err = errors.New(fmt.Sprintf("%s (%d)", msg.(string), resp.StatusCode))
 		} else {
 			err = errors.New(fmt.Sprintf("HTTP status %d; body: '%s'", resp.StatusCode, j))
 		}
