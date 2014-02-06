@@ -48,7 +48,7 @@ const (
 // TODO: add support for pagination and date range.
 func (m *MangoPay) Events() (EventList, error) {
 	es := EventList{}
-	resp, err := m.request(ActionEvents, nil)
+	resp, err := m.request(actionEvents, nil)
 	if err != nil {
 		return nil, err
 	}

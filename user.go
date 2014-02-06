@@ -46,7 +46,7 @@ Creation date           : %d
 Person type             : %s`, u.Id, u.Tag, u.FirstName, u.LastName, u.Email, u.Address, u.Birthday, u.Nationality, u.CountryOfResidence, u.Occupation, u.IncomeRange, u.ProofOfIdentity, u.ProofOfAddress, u.CreationDate, u.PersonType)
 }
 
-func (m *MangoPay) userRequest(action MangoAction, data JsonObject) (*NaturalUser, error) {
+func (m *MangoPay) userRequest(action mangoAction, data JsonObject) (*NaturalUser, error) {
 	resp, err := m.request(action, data)
 	if err != nil {
 		return nil, err
@@ -69,11 +69,11 @@ func (m *MangoPay) NewNaturalUser() *NaturalUser {
 // if the user's Id is an empty string. The Edit API is used when
 // the Id is a non-empty string.
 func (u *NaturalUser) Save() error {
-	var action MangoAction
+	var action mangoAction
 	if u.Id == "" {
-		action = ActionCreateNaturalUser
+		action = actionCreateNaturalUser
 	} else {
-		action = ActionEditNaturalUser
+		action = actionEditNaturalUser
 	}
 
 	data := JsonObject{}
@@ -91,7 +91,7 @@ func (u *NaturalUser) Save() error {
 	}
 
 	// Fields not allowed when creating a user
-	if action == ActionCreateNaturalUser {
+	if action == actionCreateNaturalUser {
 		delete(data, "Id")
 		delete(data, "CreationDate")
 	}
@@ -107,7 +107,7 @@ func (u *NaturalUser) Save() error {
 // NaturalUser finds a natural user using the user_id attribute.
 func (m *MangoPay) NaturalUser(uid int) (*NaturalUser, error) {
 	/*
-		u, err := s.userRequest(ActionFetchNaturalUser, JsonObject{"user_id": uid})
+		u, err := s.userRequest(actionFetchNaturalUser, JsonObject{"user_id": uid})
 		if err != nil {
 			return nil, err
 		}

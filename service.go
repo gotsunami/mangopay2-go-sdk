@@ -147,7 +147,7 @@ func (s *MangoPay) makeSignature(method, path string, data JsonObject) (string, 
 // mangopay service.
 // TODO: only basic access auth supported at the moment. Add support
 // for OAuth2.0.
-func (s *MangoPay) request(ma MangoAction, data JsonObject) (*http.Response, error) {
+func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, error) {
 	mr, ok := mangoRequests[ma]
 	if !ok {
 		return nil, errors.New("Action not implemented.")
@@ -198,7 +198,10 @@ func (s *MangoPay) request(ma MangoAction, data JsonObject) (*http.Response, err
 				fmt.Printf("%s: %v\n", k, j)
 			}
 		}
-		fmt.Printf("\n%s\n", string(body))
+		rb := string(body)
+		if rb != "null" {
+			fmt.Printf("\n%s\n", rb)
+		}
 		fmt.Println("\nSending request ...")
 		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG REQUEST")
 	}
