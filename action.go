@@ -10,10 +10,11 @@ const (
 	actionEvents mangoAction = iota
 	actionCreateNaturalUser
 	actionEditNaturalUser
+	actionAllUsers
+	actionFetchNaturalUser
 
 	/*
 		actionCreateUser Mangoaction = iota
-		actionFetchUser
 		actionUpdateUser
 		actionFetchUserWallets
 
@@ -52,18 +53,22 @@ var mangoRequests = map[mangoAction]mangoRequest{
 		"/users/natural",
 		nil,
 	},
+	actionEditNaturalUser: mangoRequest{
+		"PUT",
+		"/users/natural/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionAllUsers: mangoRequest{
+		"GET",
+		"/users",
+		nil,
+	},
+	actionFetchNaturalUser: mangoRequest{
+		"GET",
+		"/users/natural/{{Id}}",
+		JsonObject{"Id": ""},
+	},
 	/*
-		// User
-		actionFetchUser: mangoRequest{
-			"GET",
-			"/users/{{user_id}}",
-			JsonObject{"user_id": ""},
-		},
-		actionUpdateUser: mangoRequest{
-			"PUT",
-			"/users/{{user_id}}",
-			JsonObject{"user_id": ""},
-		},
 		actionFetchUserWallets: mangoRequest{
 			"GET",
 			"/users/{{user_id}}/wallets",

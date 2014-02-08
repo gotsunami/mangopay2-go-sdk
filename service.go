@@ -75,74 +75,6 @@ func (m *MangoPay) Option(opts ...option) {
 	}
 }
 
-/*
-func request() {
-	resp, err := s.handleResponse(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(User)
-	if err := unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
-
-}
-*/
-
-// makeHashedKey hashes a string with SHA-1 algorithm and returns a
-// 20 bytes hash.
-//
-// String to sign for GET methods :		{method}|{urlPath}|
-// For POST and PUT methods :    		{method}|{urlPath}|{request body}|
-/*
-func (s *MangoPay) makeHashedKey(method, path string, data JsonObject) ([]byte, error) {
-	if method != "GET" {
-		if data == nil {
-			return nil, errors.New("missing body data for POST or PUT request")
-		}
-	}
-	key := fmt.Sprintf("%s|%s|", method, path)
-	if method != "GET" {
-		marshaled, err := json.Marshal(data)
-		if err != nil {
-			return nil, err
-		}
-		key += string(marshaled) + "|"
-	}
-
-	// Compute hash
-	hash := sha1.New()
-	io.WriteString(hash, key)
-
-	return hash.Sum(nil), nil
-}
-
-// makeSignature computes a request signature, supplied in the request's header
-// with the X-Leetchi-Signature key.
-//
-// The signature is calculated by hashing a string with SHA-1 algorithm,
-// signing it with the client’s RSA key and converting to Base64.
-func (s *MangoPay) makeSignature(method, path string, data JsonObject) (string, error) {
-	hashed, err := s.makeHashedKey(method, path, data)
-	if err != nil {
-		return "", err
-	}
-
-	signature, err := rsa.SignPKCS1v15(rand.Reader, s.pkey, crypto.SHA1, hashed)
-	if err != nil {
-		return "", err
-	}
-
-	// Convert to base64
-	var buf bytes.Buffer
-	encoder := base64.NewEncoder(base64.StdEncoding, &buf)
-	encoder.Write(signature)
-	encoder.Close()
-	return buf.String(), nil
-}
-*/
-
 // request prepares and sends a well formatted HTTP request to the
 // mangopay service.
 // TODO: only basic access auth supported at the moment. Add support
@@ -212,7 +144,7 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 	// Handle reponse status code
 	if resp.StatusCode != http.StatusOK {
 		j := JsonObject{}
-		err = unMarshalJSONResponse(resp, &j)
+		err = s.unMarshalJSONResponse(resp, &j)
 		if err != nil {
 			return nil, err
 		}
@@ -226,7 +158,7 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 }
 
 // Unmarshal a JSON HTTP response into an instance.
-func unMarshalJSONResponse(resp *http.Response, v interface{}) error {
+func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) error {
 	if resp == nil {
 		return errors.New("can't unmarshal nil response")
 	}
@@ -234,6 +166,11 @@ func unMarshalJSONResponse(resp *http.Response, v interface{}) error {
 	resp.Body.Close()
 	if err != nil {
 		return err
+	}
+	if m.verbosity == Debug {
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>> DEBUG RESPONSE")
+		fmt.Println("Raw body:", string(b))
+		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG RESPONSE")
 	}
 	if err := json.Unmarshal(b, v); err != nil {
 		return err

@@ -66,13 +66,17 @@ func main() {
 where action is one of: 
   conf              show config
   events            list all events (PayIns, PayOuts, Transfers)
-  addnatuser        create a natural user
+
+  addnatuser*       create a natural user
+  editnatuser*      update natural user info
+  natuser*          get natural user info
+  users             list all users
+
+Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
 `))
 		/* OLD actions
-		   fetchuser         get user info
-		   updateuser        update user info
 		   fetchuserwallets  get wallets of a user
 
 		   createbenef       create a beneficiary
@@ -92,7 +96,7 @@ Options:
 		os.Exit(2)
 	}
 
-	post := flag.String("d", "", "JSON for POST or PUT data")
+	post := flag.String("d", "", "JSON data part of the HTTP request")
 	verbose := flag.Int("v", 0, "Verbosity level (1 for debug)")
 	flag.Parse()
 
@@ -141,19 +145,38 @@ Options:
 		}
 		fmt.Println("Natural user created:")
 		fmt.Println(u)
+	case "editnatuser":
+		u := service.NewNaturalUser()
+		if err := json.Unmarshal([]byte(*post), u); err != nil {
+			perror(err.Error())
+		}
+		if err := u.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Natural user updated:")
+		fmt.Println(u)
+	case "users":
+		users, err := service.Users()
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(users)
+		for _, u := range users {
+			fmt.Println(u)
+		}
+	case "natuser":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u, err := service.NaturalUser(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(u)
 		/*
-			case "fetchuser":
-				var data struct {
-					UserId int `json:"user_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				u, err := mango.FindUser(service, data.UserId)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(u)
 			case "updateuser":
 				data := new(mango.JsonObject)
 				if err := json.Unmarshal([]byte(*post), &data); err != nil {

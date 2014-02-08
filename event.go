@@ -52,7 +52,7 @@ func (m *MangoPay) Events() (EventList, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := unMarshalJSONResponse(resp, &es); err != nil {
+	if err := m.unMarshalJSONResponse(resp, &es); err != nil {
 		return nil, err
 	}
 	return es, err
