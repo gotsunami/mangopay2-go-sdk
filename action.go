@@ -17,6 +17,8 @@ const (
 	actionCreateLegalUser
 	actionEditLegalUser
 	actionFetchLegalUser
+
+	actionFetchUser
 )
 
 // JsonObject is used to manage JSON data.
@@ -67,6 +69,11 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionFetchLegalUser: mangoRequest{
 		"GET",
 		"/users/legal/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchUser: mangoRequest{
+		"GET",
+		"/users/{{Id}}",
 		JsonObject{"Id": ""},
 	},
 }

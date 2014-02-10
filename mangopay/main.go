@@ -67,14 +67,15 @@ where action is one of:
   conf              show config
   events            list all events (PayIns, PayOuts, Transfers)
   users             list all users
+  user*             fetch a user (natural or legal)
 
   addnatuser*       create a natural user
   editnatuser*      update natural user info
-  natuser*          get natural user info
+  natuser*          fetch natural user info
 
   addlegaluser*     create a legal user
   editlegaluser*    update legal user info
-  legaluser*        get legal user info
+  legaluser*        fetch legal user info
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -208,6 +209,18 @@ Options:
 			perror(err.Error())
 		}
 		u, err := service.LegalUser(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(u)
+	case "user":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u, err := service.User(data.Id)
 		if err != nil {
 			perror(err.Error())
 		}
