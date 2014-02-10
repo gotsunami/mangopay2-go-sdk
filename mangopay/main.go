@@ -66,11 +66,15 @@ func main() {
 where action is one of: 
   conf              show config
   events            list all events (PayIns, PayOuts, Transfers)
+  users             list all users
 
   addnatuser*       create a natural user
   editnatuser*      update natural user info
   natuser*          get natural user info
-  users             list all users
+
+  addlegaluser*     create a legal user
+  editlegaluser*    update legal user info
+  legaluser*        get legal user info
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -176,194 +180,38 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(u)
-		/*
-			case "updateuser":
-				data := new(mango.JsonObject)
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				b := *data
-				if _, ok := b["user_id"]; !ok {
-					perror("missing user_id in JSON data")
-				}
-				var val int
-				switch b["user_id"].(type) {
-				case float64:
-					val = int(b["user_id"].(float64))
-				case string:
-					i, err := strconv.ParseInt(b["user_id"].(string), 10, 0)
-					if err != nil {
-						perror(err.Error())
-					}
-					val = int(i)
-				}
-				u, err := mango.FindUser(service, val)
-				if err != nil {
-					perror(err.Error())
-				}
-				u, err = u.Update(*data)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(u)
-			case "createbenef":
-				data := new(mango.JsonObject)
-				if err := json.Unmarshal([]byte(*post), data); err != nil {
-					perror(err.Error())
-				}
-				b, err := mango.NewBeneficiary(service, *data)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(b)
-			case "fetchbenef":
-				var data struct {
-					BeneficiaryId int `json:"beneficiary_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				b, err := mango.FindBeneficiary(service, data.BeneficiaryId)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(b)
-			case "createpc":
-				data := new(mango.JsonObject)
-				if err := json.Unmarshal([]byte(*post), data); err != nil {
-					perror(err.Error())
-				}
-				pc, err := mango.NewPaymentCard(service, *data)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(pc)
-			case "fetchpc":
-				var data struct {
-					PaymentCardId int `json:"paymentcard_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				pc, err := mango.FindPaymentCard(service, data.PaymentCardId)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(pc)
-			case "fetchuserpc":
-				var data struct {
-					UserId int `json:"user_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				u, err := mango.FindUser(service, data.UserId)
-				if err != nil {
-					perror(err.Error())
-				}
-				pcs, err := u.PaymentCards()
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(pcs)
-			case "deletepc":
-				var data struct {
-					PaymentCardId int `json:"paymentcard_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				pc, err := mango.FindPaymentCard(service, data.PaymentCardId)
-				if err != nil {
-					perror(err.Error())
-				}
-				if err := pc.Delete(); err != nil {
-					perror(err.Error())
-				}
-			case "createwallet":
-				data := new(mango.JsonObject)
-				if err := json.Unmarshal([]byte(*post), data); err != nil {
-					perror(err.Error())
-				}
-				w, err := mango.NewWallet(service, *data)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(w)
-			case "fetchwallet":
-				var data struct {
-					WalletId int `json:"wallet_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				w, err := mango.FindWallet(service, data.WalletId)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(w)
-			case "updatewallet":
-				data := new(mango.JsonObject)
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				b := *data
-				if _, ok := b["wallet_id"]; !ok {
-					perror("missing wallet_id in JSON data")
-				}
-				var val int
-				switch b["wallet_id"].(type) {
-				case float64:
-					val = int(b["wallet_id"].(float64))
-				case string:
-					i, err := strconv.ParseInt(b["wallet_id"].(string), 10, 0)
-					if err != nil {
-						perror(err.Error())
-					}
-					val = int(i)
-				}
-				w, err := mango.FindWallet(service, val)
-				if err != nil {
-					perror(err.Error())
-				}
-				r, err := w.Update(*data)
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(r)
-			case "fetchuserswallet":
-				var data struct {
-					WalletId int `json:"wallet_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				w, err := mango.FindWallet(service, data.WalletId)
-				if err != nil {
-					perror(err.Error())
-				}
-				users, err := w.FindUsers()
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(users)
-			case "fetchuserwallets":
-				var data struct {
-					UserId int `json:"user_id"`
-				}
-				if err := json.Unmarshal([]byte(*post), &data); err != nil {
-					perror(err.Error())
-				}
-				u, err := mango.FindUser(service, data.UserId)
-				if err != nil {
-					perror(err.Error())
-				}
-				ws, err := u.FindWallets()
-				if err != nil {
-					perror(err.Error())
-				}
-				fmt.Println(ws)
-		*/
+	case "addlegaluser":
+		u := service.NewLegalUser()
+		if err := json.Unmarshal([]byte(*post), u); err != nil {
+			perror(err.Error())
+		}
+		if err := u.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Legal user created:")
+		fmt.Println(u)
+	case "editlegaluser":
+		u := service.NewLegalUser()
+		if err := json.Unmarshal([]byte(*post), u); err != nil {
+			perror(err.Error())
+		}
+		if err := u.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Legal user updated:")
+		fmt.Println(u)
+	case "legaluser":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u, err := service.LegalUser(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(u)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

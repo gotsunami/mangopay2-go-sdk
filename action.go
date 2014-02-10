@@ -8,29 +8,15 @@ type mangoAction int
 
 const (
 	actionEvents mangoAction = iota
+	actionAllUsers
+
 	actionCreateNaturalUser
 	actionEditNaturalUser
-	actionAllUsers
 	actionFetchNaturalUser
 
-	/*
-		actionCreateUser Mangoaction = iota
-		actionUpdateUser
-		actionFetchUserWallets
-
-		actionCreateBeneficiary
-		actionFetchBeneficiary
-
-		actionCreatePaymentCard
-		actionFetchPaymentCard
-		actionFetchUserPaymentCards
-		actionDeletePaymentCard
-
-		actionCreateWallet
-		actionFetchWallet
-		actionUpdateWallet
-		actionFetchUsersOfWallet
-	*/
+	actionCreateLegalUser
+	actionEditLegalUser
+	actionFetchLegalUser
 )
 
 // JsonObject is used to manage JSON data.
@@ -68,64 +54,19 @@ var mangoRequests = map[mangoAction]mangoRequest{
 		"/users/natural/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	/*
-		actionFetchUserWallets: mangoRequest{
-			"GET",
-			"/users/{{user_id}}/wallets",
-			JsonObject{"user_id": ""},
-		},
-		// Beneficiary
-		actionCreateBeneficiary: mangoRequest{
-			"POST",
-			"/beneficiaries",
-			nil,
-		},
-		actionFetchBeneficiary: mangoRequest{
-			"GET",
-			"/beneficiaries/{{beneficiary_id}}",
-			JsonObject{"beneficiary_id": ""},
-		},
-		// Payment card
-		actionCreatePaymentCard: mangoRequest{
-			"POST",
-			"/cards",
-			nil,
-		},
-		actionFetchPaymentCard: mangoRequest{
-			"GET",
-			"/cards/{{paymentcard_id}}",
-			JsonObject{"paymentcard_id": ""},
-		},
-		actionFetchUserPaymentCards: mangoRequest{
-			"GET",
-			"/users/{{user_id}}/cards",
-			JsonObject{"user_id": ""},
-		},
-		actionDeletePaymentCard: mangoRequest{
-			"DELETE",
-			"/cards/{{paymentcard_id}}",
-			JsonObject{"paymentcard_id": ""},
-		},
-		// Wallet
-		actionCreateWallet: mangoRequest{
-			"POST",
-			"/wallets",
-			nil,
-		},
-		actionFetchWallet: mangoRequest{
-			"GET",
-			"/wallets/{{wallet_id}}",
-			JsonObject{"wallet_id": ""},
-		},
-		actionUpdateWallet: mangoRequest{
-			"PUT",
-			"/wallets/{{wallet_id}}",
-			JsonObject{"wallet_id": ""},
-		},
-		actionFetchUsersOfWallet: mangoRequest{
-			"GET",
-			"/wallets/{{wallet_id}}/users",
-			JsonObject{"wallet_id": ""},
-		},
-	*/
+	actionCreateLegalUser: mangoRequest{
+		"POST",
+		"/users/legal",
+		nil,
+	},
+	actionEditLegalUser: mangoRequest{
+		"PUT",
+		"/users/legal/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchLegalUser: mangoRequest{
+		"GET",
+		"/users/legal/{{Id}}",
+		JsonObject{"Id": ""},
+	},
 }
