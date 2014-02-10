@@ -77,26 +77,18 @@ where action is one of:
   editlegaluser*    update legal user info
   legaluser*        fetch legal user info
 
+  addwallet*        create a new wallet
+  wallet*           fetch wallet info
+  editwallet*       update wallet info
+  trwallet*         fetch all wallet's transactions
+
+  addtransfer*      create a new tranfer
+  transfer*         fetch transfer info
+
 Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
 `))
-		/* OLD actions
-		   fetchuserwallets  get wallets of a user
-
-		   createbenef       create a beneficiary
-		   fetchbenef        get beneficiary info
-
-		   createpc          create a payment card
-		   deletepc          delete a payment card
-		   fetchpc           get payment card info
-		   fetchuserpc       get user payment cards
-
-		   createwallet      create a wallet
-		   fetchwallet       get wallet info
-		   updatewallet      update wallet info
-		   fetchuserswallet  get users of a wallet
-		*/
 		flag.PrintDefaults()
 		os.Exit(2)
 	}
@@ -224,6 +216,63 @@ Options:
 		if err != nil {
 			perror(err.Error())
 		}
+		fmt.Println(u)
+	case "addwallet":
+		u := service.NewWallet()
+		if err := json.Unmarshal([]byte(*post), u); err != nil {
+			perror(err.Error())
+		}
+		if err := u.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Wallet created:")
+		fmt.Println(u)
+	case "wallet":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		w, err := service.Wallet(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(w)
+	case "editwallet":
+		w := service.NewWallet()
+		if err := json.Unmarshal([]byte(*post), w); err != nil {
+			perror(err.Error())
+		}
+		if err := w.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Wallet updated:")
+		fmt.Println(w)
+	case "trwallet":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		w, err := service.Wallet(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		trs := w.Transactions()
+		for _, t := range trs {
+			fmt.Println(t)
+		}
+	case "addtransfer":
+		u := service.NewTransfer()
+		if err := json.Unmarshal([]byte(*post), u); err != nil {
+			perror(err.Error())
+		}
+		if err := u.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Transfer created:")
 		fmt.Println(u)
 	default:
 		flag.Usage()

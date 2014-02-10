@@ -22,6 +22,7 @@ type NaturalUser struct {
 	ProofOfIdentity     string
 	ProofOfAddress      string
 	service             *MangoPay // Current service
+	wallets             WalletList
 }
 
 func (u *NaturalUser) String() string {
@@ -49,6 +50,12 @@ func (m *MangoPay) NewNaturalUser() *NaturalUser {
 	u := new(NaturalUser)
 	u.service = m
 	return u
+}
+
+// Wallets returns user's wallets.
+func (u *NaturalUser) Wallets() WalletList {
+	u.wallets = nil
+	return u.wallets
 }
 
 // Save creates or updates a natural user. The Create API is used
@@ -108,8 +115,8 @@ func (u *NaturalUser) Save() error {
 }
 
 // NaturalUser finds a natural user using the user_id attribute.
-func (m *MangoPay) NaturalUser(uid string) (*NaturalUser, error) {
-	u, err := m.naturalUserRequest(actionFetchNaturalUser, JsonObject{"Id": uid})
+func (m *MangoPay) NaturalUser(id string) (*NaturalUser, error) {
+	u, err := m.naturalUserRequest(actionFetchNaturalUser, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}

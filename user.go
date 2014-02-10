@@ -8,6 +8,12 @@ import (
 	"fmt"
 )
 
+// A MangoUser is a legal or natural user with zero, one or
+// more wallets.
+type MangoUser interface {
+	Wallets() WalletList
+}
+
 type UserList []*User
 
 // User is used by the user activity API and describe common fields to

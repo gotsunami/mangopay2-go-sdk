@@ -26,6 +26,7 @@ type LegalUser struct {
 	ProofOfRegistration                   string
 	ShareholderDeclaration                string
 	service                               *MangoPay // Current service
+	wallets                               WalletList
 }
 
 func (u *LegalUser) String() string {
@@ -56,6 +57,12 @@ func (m *MangoPay) NewLegalUser() *LegalUser {
 	u := new(LegalUser)
 	u.service = m
 	return u
+}
+
+// Wallets returns user's wallets.
+func (u *LegalUser) Wallets() WalletList {
+	u.wallets = nil
+	return u.wallets
 }
 
 // Save creates or updates a legal user. The Create API is used
@@ -115,8 +122,8 @@ func (u *LegalUser) Save() error {
 }
 
 // LegalUser finds a legal user using the user_id attribute.
-func (m *MangoPay) LegalUser(uid string) (*LegalUser, error) {
-	u, err := m.legalUserRequest(actionFetchLegalUser, JsonObject{"Id": uid})
+func (m *MangoPay) LegalUser(id string) (*LegalUser, error) {
+	u, err := m.legalUserRequest(actionFetchLegalUser, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}

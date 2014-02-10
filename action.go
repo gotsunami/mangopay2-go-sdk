@@ -19,6 +19,14 @@ const (
 	actionFetchLegalUser
 
 	actionFetchUser
+
+	actionCreateWallet
+	actionEditWallet
+	actionFetchWallet
+	actionFetchWalletTransactions
+
+	actionCreateTransfer
+	actionFetchTransfer
 )
 
 // JsonObject is used to manage JSON data.
@@ -74,6 +82,36 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionFetchUser: mangoRequest{
 		"GET",
 		"/users/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionCreateWallet: mangoRequest{
+		"POST",
+		"/wallets",
+		nil,
+	},
+	actionEditWallet: mangoRequest{
+		"PUT",
+		"/wallets/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchWallet: mangoRequest{
+		"GET",
+		"/wallets/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchWalletTransactions: mangoRequest{
+		"GET",
+		"/wallets/{{Id}}/transactions",
+		JsonObject{"Id": ""},
+	},
+	actionCreateTransfer: mangoRequest{
+		"POST",
+		"/transfers",
+		nil,
+	},
+	actionFetchTransfer: mangoRequest{
+		"GET",
+		"/transfers/{{Id}}",
 		JsonObject{"Id": ""},
 	},
 }
