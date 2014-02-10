@@ -133,25 +133,27 @@ Options:
 			}
 		}
 	case "addnatuser":
-		u := service.NewNaturalUser()
+		u := &mango.NaturalUser{}
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		if err := u.Save(); err != nil {
+		n := service.NewNaturalUser(u.FirstName, u.LastName, u.Email, u.Birthday, u.Nationality, u.CountryOfResidence)
+		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Natural user created:")
-		fmt.Println(u)
+		fmt.Println(n)
 	case "editnatuser":
-		u := service.NewNaturalUser()
+		u := &mango.NaturalUser{}
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		if err := u.Save(); err != nil {
+		n := service.NewNaturalUser(u.FirstName, u.LastName, u.Email, u.Birthday, u.Nationality, u.CountryOfResidence)
+		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Natural user updated:")
-		fmt.Println(u)
+		fmt.Println(n)
 	case "users":
 		users, err := service.Users()
 		if err != nil {
@@ -174,25 +176,27 @@ Options:
 		}
 		fmt.Println(u)
 	case "addlegaluser":
-		u := service.NewLegalUser()
+		u := &mango.LegalUser{}
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		if err := u.Save(); err != nil {
+		n := service.NewLegalUser(u.Name, u.Email, u.LegalPersonType, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeBirthday, u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence)
+		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Legal user created:")
-		fmt.Println(u)
+		fmt.Println(n)
 	case "editlegaluser":
-		u := service.NewLegalUser()
+		u := &mango.LegalUser{}
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		if err := u.Save(); err != nil {
+		n := service.NewLegalUser(u.Name, u.Email, u.LegalPersonType, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeBirthday, u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence)
+		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Legal user updated:")
-		fmt.Println(u)
+		fmt.Println(n)
 	case "legaluser":
 		var data struct {
 			Id string
@@ -218,15 +222,16 @@ Options:
 		}
 		fmt.Println(u)
 	case "addwallet":
-		u := service.NewWallet()
-		if err := json.Unmarshal([]byte(*post), u); err != nil {
+		w := &mango.Wallet{}
+		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		if err := u.Save(); err != nil {
+		n := service.NewWallet(w.Owners, w.Description, w.Currency)
+		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Wallet created:")
-		fmt.Println(u)
+		fmt.Println(n)
 	case "wallet":
 		var data struct {
 			Id string
@@ -240,15 +245,16 @@ Options:
 		}
 		fmt.Println(w)
 	case "editwallet":
-		w := service.NewWallet()
+		w := &mango.Wallet{}
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		if err := w.Save(); err != nil {
+		n := service.NewWallet(w.Owners, w.Description, w.Currency)
+		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Wallet updated:")
-		fmt.Println(w)
+		fmt.Println(n)
 	case "trwallet":
 		var data struct {
 			Id string

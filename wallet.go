@@ -12,7 +12,7 @@ import (
 // List of wallets.
 type WalletList []*Wallet
 
-// List of wallet's owners.
+// List of wallet's owners Ids.
 type OwnerList []string
 
 type Money struct {
@@ -50,8 +50,12 @@ Creation date : %d
 }
 
 // NewWallet creates a new wallet.
-func (m *MangoPay) NewWallet() *Wallet {
-	w := new(Wallet)
+func (m *MangoPay) NewWallet(owners OwnerList, desc string, currency string) *Wallet {
+	w := &Wallet{
+		Owners:      owners,
+		Description: desc,
+		Currency:    currency,
+	}
 	w.service = m
 	return w
 }

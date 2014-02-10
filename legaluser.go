@@ -52,9 +52,17 @@ Shareholder Declaration                 : %s
 `, u.Id, u.Tag, u.Email, u.CreationDate, u.PersonType, u.Name, u.LegalPersonType, u.HeadquartersAddress, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeAddress, u.LegalRepresentativeEmail, u.LegalRepresentativeBirthday, u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence, u.Statute, u.ProofOfRegistration, u.ShareholderDeclaration)
 }
 
-// NewLegalUser creates a new natural user.
-func (m *MangoPay) NewLegalUser() *LegalUser {
-	u := new(LegalUser)
+// NewLegalUser creates a new legal user.
+func (m *MangoPay) NewLegalUser(name string, email string, personType string, legalFirstName, legalLastName string, birthday int, nationality string, country string) *LegalUser {
+	u := &LegalUser{
+		Name:                                  name,
+		LegalPersonType:                       personType,
+		LegalRepresentativeFirstName:          legalFirstName,
+		LegalRepresentativeLastName:           legalLastName,
+		LegalRepresentativeBirthday:           birthday,
+		LegalRepresentativeNationality:        nationality,
+		LegalRepresentativeCountryOfResidence: country}
+	u.User = User{Email: email}
 	u.service = m
 	return u
 }

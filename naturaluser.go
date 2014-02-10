@@ -46,8 +46,15 @@ Person type             : %s
 }
 
 // NewNaturalUser creates a new natural user.
-func (m *MangoPay) NewNaturalUser() *NaturalUser {
-	u := new(NaturalUser)
+func (m *MangoPay) NewNaturalUser(first, last string, email string, birthday int, nationality, country string) *NaturalUser {
+	u := &NaturalUser{
+		FirstName:          first,
+		LastName:           last,
+		Birthday:           birthday,
+		Nationality:        nationality,
+		CountryOfResidence: country,
+	}
+	u.User = User{Email: email}
 	u.service = m
 	return u
 }
