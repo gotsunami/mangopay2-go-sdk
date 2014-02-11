@@ -226,7 +226,16 @@ Options:
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		n := service.NewWallet(w.Owners, w.Description, w.Currency)
+		ows := mango.OwnerList{}
+		for _, o := range w.Owners {
+			u := new(mango.LegalUser)
+			u.User = mango.User{Id: o}
+			ows = append(ows, u)
+		}
+		n, err := service.NewWallet(ows, w.Description, w.Currency)
+		if err != nil {
+			perror(err.Error())
+		}
 		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
@@ -249,7 +258,16 @@ Options:
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		n := service.NewWallet(w.Owners, w.Description, w.Currency)
+		ows := mango.OwnerList{}
+		for _, o := range w.Owners {
+			u := new(mango.LegalUser)
+			u.User = mango.User{Id: o}
+			ows = append(ows, u)
+		}
+		n, err := service.NewWallet(ows, w.Description, w.Currency)
+		if err != nil {
+			perror(err.Error())
+		}
 		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}

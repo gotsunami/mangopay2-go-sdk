@@ -6,6 +6,7 @@ package mango
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -13,7 +14,7 @@ import (
 type WalletList []*Wallet
 
 // List of wallet's owners Ids.
-type OwnerList []string
+type OwnerList []MangoUser
 
 type Money struct {
 	Currency string
@@ -29,7 +30,7 @@ func (b *Money) String() string {
 type Wallet struct {
 	Id           string
 	Tag          string
-	Owners       OwnerList
+	Owners       []string
 	Description  string
 	Currency     string
 	Balance      Money
@@ -49,15 +50,30 @@ Creation date : %d
 `, u.Id, u.Tag, u.Owners, u.Description, u.Currency, u.Balance.String(), u.CreationDate)
 }
 
-// NewWallet creates a new wallet.
-func (m *MangoPay) NewWallet(owners OwnerList, desc string, currency string) *Wallet {
+// NewWallet creates a new wallet. Owners must have a well-defined Id. Empty Ids will
+// return an error.
+func (m *MangoPay) NewWallet(owners OwnerList, desc string, currency string) (*Wallet, error) {
+	all := []string{}
+	for k, o := range owners {
+		id := ""
+		switch o.(type) {
+		case *LegalUser:
+			id = o.(*LegalUser).Id
+		case *NaturalUser:
+			id = o.(*NaturalUser).Id
+		}
+		if id == "" {
+			return nil, errors.New(fmt.Sprintf("Empty Id for owner %d. Unable to create wallet.", k))
+		}
+		all = append(all, id)
+	}
 	w := &Wallet{
-		Owners:      owners,
+		Owners:      all,
 		Description: desc,
 		Currency:    currency,
 	}
 	w.service = m
-	return w
+	return w, nil
 }
 
 // Save creates or updates a legal user. The Create API is used
