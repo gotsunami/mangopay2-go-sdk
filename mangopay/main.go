@@ -226,7 +226,7 @@ Options:
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		ows := mango.OwnerList{}
+		ows := mango.BuyerList{}
 		for _, o := range w.Owners {
 			u := new(mango.LegalUser)
 			u.User = mango.User{Id: o}
@@ -258,7 +258,7 @@ Options:
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		ows := mango.OwnerList{}
+		ows := mango.BuyerList{}
 		for _, o := range w.Owners {
 			u := new(mango.LegalUser)
 			u.User = mango.User{Id: o}
@@ -289,8 +289,14 @@ Options:
 			fmt.Println(t)
 		}
 	case "addtransfer":
-		u := service.NewTransfer()
-		if err := json.Unmarshal([]byte(*post), u); err != nil {
+		t := &mango.Transfer{}
+		if err := json.Unmarshal([]byte(*post), t); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{Id: t.AuthorId}
+		k, err := service.NewTransfer(u, t.DebitedFunds, t.Fees, &mango.Wallet{Id: t.DebitedWalletId}, &mango.Wallet{Id: t.CreditedWalletId})
+		if k != nil {
 			perror(err.Error())
 		}
 		if err := u.Save(); err != nil {

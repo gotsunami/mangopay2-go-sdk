@@ -6,6 +6,7 @@ package mango
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -17,21 +18,21 @@ type TransferList []*Transfer
 //
 // See http://docs.mangopay.com/api-references/transfers/.
 type Transfer struct {
-	Id                 string
-	Tag                string
-	AuthorId           string
-	CreditedUserId     string
-	DebitedFunds       Money
-	Fees               Money
-	DebitedTransferID  string
-	CreditedTransferID string
-	CreationDate       int
-	CreditedFunds      Money
-	Status             string
-	ResultCode         string
-	ResultMessage      string
-	ExecutionDate      int
-	service            *MangoPay
+	Id               string
+	Tag              string
+	AuthorId         string
+	CreditedUserId   string
+	DebitedFunds     Money
+	Fees             Money
+	DebitedWalletId  string
+	CreditedWalletId string
+	CreationDate     int
+	CreditedFunds    Money
+	Status           string
+	ResultCode       string
+	ResultMessage    string
+	ExecutionDate    int
+	service          *MangoPay
 }
 
 func (t *Transfer) String() string {
@@ -41,22 +42,54 @@ Tag              : %s
 CreditedUserId   : %s
 DebitedFunds     : %s
 Fees             : %s
-DebitedTransferID  : %s
-CreditedTransferID : %s
+DebitedWalletId  : %s
+CreditedWalletId : %s
 Creation date    : %d
 CreditedFunds    : %s
 Status           : %s
 ResultCode       : %s
 ResultMessage    : %s
 ExecutionDate    time
-`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds, t.Fees, t.DebitedTransferID, t.CreditedTransferID, t.CreationDate, t.CreditedFunds, t.Status, t.ResultCode, t.ResultMessage, t.ExecutionDate)
+`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds, t.Fees, t.DebitedWalletId, t.CreditedWalletId, t.CreationDate, t.CreditedFunds, t.Status, t.ResultCode, t.ResultMessage, t.ExecutionDate)
 }
 
 // NewTransfer creates a new tranfer (or transaction).
-func (m *MangoPay) NewTransfer() *Transfer {
-	t := new(Transfer)
+func (m *MangoPay) NewTransfer(author Buyer, amount Money, fees Money, from, to *Wallet) (*Transfer, error) {
+	msg := "new tranfer: "
+	if author == nil {
+		return nil, errors.New(msg + "nil author")
+	}
+	if from == nil {
+		return nil, errors.New(msg + "nil source wallet")
+	}
+	if to == nil {
+		return nil, errors.New(msg + "nil dest wallet")
+	}
+	if from.Id == "" {
+		return nil, errors.New(msg + "source wallet has empty Id")
+	}
+	if to.Id == "" {
+		return nil, errors.New(msg + "dest wallet has empty Id")
+	}
+	id := ""
+	switch author.(type) {
+	case *LegalUser:
+		id = author.(*LegalUser).Id
+	case *NaturalUser:
+		id = author.(*NaturalUser).Id
+	}
+	if id == "" {
+		return nil, errors.New(msg + "author has empty Id")
+	}
+	t := &Transfer{
+		AuthorId:         id,
+		DebitedFunds:     amount,
+		Fees:             fees,
+		DebitedWalletId:  from.Id,
+		CreditedWalletId: to.Id,
+	}
 	t.service = m
-	return t
+	return t, nil
 }
 
 // Save creates a transfer.

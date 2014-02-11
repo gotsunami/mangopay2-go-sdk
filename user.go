@@ -8,9 +8,9 @@ import (
 	"fmt"
 )
 
-// A MangoUser is a legal or natural user with zero, one or
+// A Buyer is a legal or natural user with zero, one or
 // more wallets.
-type MangoUser interface {
+type Buyer interface {
 	Wallets() WalletList
 }
 
