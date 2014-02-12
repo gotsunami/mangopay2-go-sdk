@@ -27,6 +27,8 @@ const (
 
 	actionCreateTransfer
 	actionFetchTransfer
+
+	actionFetchPayIn
 )
 
 // JsonObject is used to manage JSON data.
