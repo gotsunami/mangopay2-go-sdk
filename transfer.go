@@ -10,6 +10,14 @@ import (
 	"fmt"
 )
 
+type ErrTransactionFailed struct {
+	msg string
+}
+
+func (e *ErrTransactionFailed) Error() string {
+	return "transaction failed: " + e.msg
+}
+
 // List of transactions.
 type TransferList []*Transfer
 
@@ -49,8 +57,8 @@ CreditedFunds    : %s
 Status           : %s
 ResultCode       : %s
 ResultMessage    : %s
-ExecutionDate    time
-`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds, t.Fees, t.DebitedWalletId, t.CreditedWalletId, t.CreationDate, t.CreditedFunds, t.Status, t.ResultCode, t.ResultMessage, t.ExecutionDate)
+ExecutionDate    : %d
+`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds.String(), t.Fees.String(), t.DebitedWalletId, t.CreditedWalletId, t.CreationDate, t.CreditedFunds.String(), t.Status, t.ResultCode, t.ResultMessage, t.ExecutionDate)
 }
 
 // NewTransfer creates a new tranfer (or transaction).
@@ -94,7 +102,6 @@ func (m *MangoPay) NewTransfer(author Buyer, amount Money, fees Money, from, to 
 
 // Save creates a transfer.
 func (t *Transfer) Save() error {
-	var action mangoAction
 	data := JsonObject{}
 	j, err := json.Marshal(t)
 	if err != nil {
@@ -110,15 +117,19 @@ func (t *Transfer) Save() error {
 	}
 
 	// Fields not allowed when creating a tranfer.
-	delete(data, "Id")
-	delete(data, "CreationDate")
-	delete(data, "ExecutionDate")
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status"} {
+		delete(data, field)
+	}
 
-	tr, err := t.service.transferRequest(action, data)
+	tr, err := t.service.transferRequest(actionCreateTransfer, data)
 	if err != nil {
 		return err
 	}
 	*t = *tr
+
+	if t.Status == "FAILED" {
+		return &ErrTransactionFailed{t.ResultMessage}
+	}
 	return nil
 }
 

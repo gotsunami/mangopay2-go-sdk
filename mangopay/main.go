@@ -296,14 +296,26 @@ Options:
 		u := new(mango.LegalUser)
 		u.User = mango.User{Id: t.AuthorId}
 		k, err := service.NewTransfer(u, t.DebitedFunds, t.Fees, &mango.Wallet{Id: t.DebitedWalletId}, &mango.Wallet{Id: t.CreditedWalletId})
-		if k != nil {
+		if err != nil {
 			perror(err.Error())
 		}
-		if err := u.Save(); err != nil {
+		if err := k.Save(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Transfer created:")
-		fmt.Println(u)
+		fmt.Println(k)
+	case "transfer":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		t, err := service.Transfer(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(t)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))
