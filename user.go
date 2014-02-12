@@ -8,9 +8,9 @@ import (
 	"fmt"
 )
 
-// A Buyer is a legal or natural user with zero, one or
+// A Consumer is a legal or natural user with zero, one or
 // more wallets.
-type Buyer interface {
+type Consumer interface {
 	Wallets() WalletList
 }
 

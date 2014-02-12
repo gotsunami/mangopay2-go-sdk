@@ -14,7 +14,7 @@ import (
 type WalletList []*Wallet
 
 // List of wallet's owners.
-type BuyerList []Buyer
+type ConsumerList []Consumer
 
 type Money struct {
 	Currency string
@@ -52,7 +52,7 @@ Creation date : %d
 
 // NewWallet creates a new wallet. Owners must have a well-defined Id. Empty Ids will
 // return an error.
-func (m *MangoPay) NewWallet(owners BuyerList, desc string, currency string) (*Wallet, error) {
+func (m *MangoPay) NewWallet(owners ConsumerList, desc string, currency string) (*Wallet, error) {
 	all := []string{}
 	for k, o := range owners {
 		id := ""

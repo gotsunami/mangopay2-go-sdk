@@ -226,7 +226,7 @@ Options:
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		ows := mango.BuyerList{}
+		ows := mango.ConsumerList{}
 		for _, o := range w.Owners {
 			u := new(mango.LegalUser)
 			u.User = mango.User{Id: o}
@@ -258,7 +258,7 @@ Options:
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
 			perror(err.Error())
 		}
-		ows := mango.BuyerList{}
+		ows := mango.ConsumerList{}
 		for _, o := range w.Owners {
 			u := new(mango.LegalUser)
 			u.User = mango.User{Id: o}

@@ -10,6 +10,7 @@ import (
 	"fmt"
 )
 
+// Custom error returned in case of failed transaction.
 type ErrTransactionFailed struct {
 	msg string
 }
@@ -62,7 +63,7 @@ ExecutionDate    : %d
 }
 
 // NewTransfer creates a new tranfer (or transaction).
-func (m *MangoPay) NewTransfer(author Buyer, amount Money, fees Money, from, to *Wallet) (*Transfer, error) {
+func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, to *Wallet) (*Transfer, error) {
 	msg := "new tranfer: "
 	if author == nil {
 		return nil, errors.New(msg + "nil author")
@@ -100,7 +101,9 @@ func (m *MangoPay) NewTransfer(author Buyer, amount Money, fees Money, from, to 
 	return t, nil
 }
 
-// Save creates a transfer.
+// Save sends an HTTP query to create a transfer. Upon successful creation,
+// it may return an ErrTransactionFailed error if the transaction has been
+// rejected (unsufficient wallet balance for example).
 func (t *Transfer) Save() error {
 	data := JsonObject{}
 	j, err := json.Marshal(t)
