@@ -11,12 +11,13 @@ import (
 )
 
 // Custom error returned in case of failed transaction.
-type ErrTransactionFailed struct {
-	msg string
+type ErrTransferFailed struct {
+	transferId string
+	msg        string
 }
 
-func (e *ErrTransactionFailed) Error() string {
-	return "transaction failed: " + e.msg
+func (e *ErrTransferFailed) Error() string {
+	return fmt.Sprintf("transfer %s failed: %s ", e.transferId, e.msg)
 }
 
 // List of transactions.
@@ -102,7 +103,7 @@ func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, 
 }
 
 // Save sends an HTTP query to create a transfer. Upon successful creation,
-// it may return an ErrTransactionFailed error if the transaction has been
+// it may return an ErrTransferFailed error if the transaction has been
 // rejected (unsufficient wallet balance for example).
 func (t *Transfer) Save() error {
 	data := JsonObject{}
@@ -131,7 +132,7 @@ func (t *Transfer) Save() error {
 	*t = *tr
 
 	if t.Status == "FAILED" {
-		return &ErrTransactionFailed{t.ResultMessage}
+		return &ErrTransferFailed{t.Id, t.ResultMessage}
 	}
 	return nil
 }

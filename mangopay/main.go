@@ -34,7 +34,7 @@ func (c *config) String() string {
 
 func perror(msg string) {
 	fmt.Fprintf(os.Stderr, "error: %s\n", msg)
-	os.Exit(2)
+	os.Exit(1)
 }
 
 // Parse config file
@@ -300,6 +300,9 @@ Options:
 			perror(err.Error())
 		}
 		if err := k.Save(); err != nil {
+			if _, ok := err.(*mango.ErrTransferFailed); ok {
+				fmt.Println(k)
+			}
 			perror(err.Error())
 		}
 		fmt.Println("Transfer created:")
