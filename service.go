@@ -51,10 +51,15 @@ type MangoPay struct {
 	authMethod AuthMode
 }
 
-// MangoPay object identity data.
-type Identity struct {
-	ID                       int
-	CreationDate, UpdateDate int
+// ProcessingReply holds commong fields part of MangoPay API replies.
+type ProcessingReply struct {
+	Id            string
+	Tag           string
+	CreationDate  int
+	Status        string
+	ResultCode    string
+	ResultMessage string
+	ExecutionDate int
 }
 
 // NewMangoPay creates a suitable environment for accessing

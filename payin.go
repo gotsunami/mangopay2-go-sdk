@@ -20,33 +20,33 @@ func (e *ErrPayInFailed) Error() string {
 	return fmt.Sprintf("payIn %s failed: %s ", e.payinId, e.msg)
 }
 
-// WebPayIn hold details about making a payment through a web interface.
-//
-// See http://docs.mangopay.com/api-references/payins/payins-card-web/
-type WebPayIn struct {
-	Id               string
-	Tag              string
+// PayIn holds common fields to all MangoPay's supported payment means
+// (through web, direct, preauthorized, bank wire).
+type PayIn struct {
+	ProcessingReply
 	AuthorId         string
+	CreditedUserId   string
 	DebitedFunds     Money
 	Fees             Money
 	CreditedWalletId string
-	ReturnUrl        string
-	Culture          string
-	CardType         string
 	SecureMode       string
-	CreationDate     int
 	CreditedFunds    Money
-	CreditedUserId   string
-	Status           string
-	ResultCode       string
-	ResultMessage    string
-	ExecutionDate    int
 	Type             string // PAY_IN, PAY_OUT or TRANSFER
 	Nature           string // REGULAR, REFUND or REPUDIATION
 	PaymentType      string
 	ExecutionType    string // WEB or DIRECT (with tokenized card)
-	RedirectUrl      string
-	service          *MangoPay
+}
+
+// WebPayIn hold details about making a payment through a web interface.
+//
+// See http://docs.mangopay.com/api-references/payins/payins-card-web/
+type WebPayIn struct {
+	PayIn
+	ReturnUrl   string
+	Culture     string
+	CardType    string
+	RedirectUrl string
+	service     *MangoPay
 }
 
 func (p *WebPayIn) String() string {

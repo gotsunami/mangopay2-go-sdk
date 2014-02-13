@@ -28,20 +28,14 @@ type TransferList []*Transfer
 //
 // See http://docs.mangopay.com/api-references/transfers/.
 type Transfer struct {
-	Id               string
-	Tag              string
+	ProcessingReply
 	AuthorId         string
 	CreditedUserId   string
 	DebitedFunds     Money
 	Fees             Money
 	DebitedWalletId  string
 	CreditedWalletId string
-	CreationDate     int
 	CreditedFunds    Money
-	Status           string
-	ResultCode       string
-	ResultMessage    string
-	ExecutionDate    int
 	service          *MangoPay
 }
 
@@ -97,6 +91,7 @@ func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, 
 		Fees:             fees,
 		DebitedWalletId:  from.Id,
 		CreditedWalletId: to.Id,
+		ProcessingReply:  ProcessingReply{},
 	}
 	t.service = m
 	return t, nil
