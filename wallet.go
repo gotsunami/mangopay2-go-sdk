@@ -16,13 +16,15 @@ type WalletList []*Wallet
 // List of wallet's owners.
 type ConsumerList []Consumer
 
+// Money specifies which currency and amount (in cents!) to use in
+// a payment transaction.
 type Money struct {
 	Currency string
-	Amount   float64
+	Amount   int // in cents, i.e 120 for 1.20 EUR
 }
 
 func (b *Money) String() string {
-	return fmt.Sprintf("%.2f %s", b.Amount, b.Currency)
+	return fmt.Sprintf("%.2f %s", float64(b.Amount/100), b.Currency)
 }
 
 // Wallet stores all payins and tranfers from users in order to

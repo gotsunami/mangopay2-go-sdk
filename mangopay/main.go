@@ -85,6 +85,8 @@ where action is one of:
   addtransfer*      create a new tranfer
   transfer*         fetch transfer info
 
+  addwebpayin       create a payIn through web interface
+
 Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
@@ -319,6 +321,25 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(t)
+	case "addwebpayin":
+		w := &mango.WebPayIn{}
+		if err := json.Unmarshal([]byte(*post), w); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: w.AuthorId}}
+		k, err := service.NewWebPayIn(u, w.DebitedFunds, w.Fees, &mango.Wallet{Id: w.CreditedWalletId}, w.ReturnUrl, w.Culture)
+		if err != nil {
+			perror(err.Error())
+		}
+		if err := k.Save(); err != nil {
+			if _, ok := err.(*mango.ErrPayInFailed); ok {
+				fmt.Println(k)
+			}
+			perror(err.Error())
+		}
+		fmt.Println("Web PayIn created:")
+		fmt.Println(k)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

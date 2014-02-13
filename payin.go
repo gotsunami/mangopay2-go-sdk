@@ -6,8 +6,9 @@ package mango
 
 import (
 	"encoding/json"
-	_ "errors"
+	"errors"
 	"fmt"
+	"net/url"
 )
 
 // Custom error returned in case of failed payIn.
@@ -61,24 +62,55 @@ ReturnUrl        : %s
 Culture          : %s
 CardType         : %s
 SecureMode       : %s
-CreationDate     : %d
+CreationDate     : %s
 CreditedFunds    : %s
 CreditedUserId   : %s
 Status           : %s
 ResultCode       : %s
 ResultMessage    : %s
-ExecutionDate    : %d
+ExecutionDate    : %s
 Type             : %s 
 Nature           : %s
 PaymentType      : %s
 ExecutionType    : %s
 RedirectUrl      : %s
-`, p.Id, p.Tag, p.AuthorId, p.DebitedFunds, p.Fees, p.CreditedWalletId, p.ReturnUrl, p.Culture, p.CardType, p.SecureMode, p.CreationDate, p.CreditedFunds, p.CreditedUserId, p.Status, p.ResultCode, p.ResultMessage, p.ExecutionDate, p.Type, p.Nature, p.PaymentType, p.ExecutionType, p.RedirectUrl)
+`, p.Id, p.Tag, p.AuthorId, p.DebitedFunds.String(), p.Fees.String(), p.CreditedWalletId, p.ReturnUrl, p.Culture, p.CardType, p.SecureMode, unixTimeToString(p.CreationDate), p.CreditedFunds.String(), p.CreditedUserId, p.Status, p.ResultCode, p.ResultMessage, unixTimeToString(p.ExecutionDate), p.Type, p.Nature, p.PaymentType, p.ExecutionType, p.RedirectUrl)
 }
 
 // NewWebPayIn creates a new payment.
-func (m *MangoPay) NewWebPayIn() (*WebPayIn, error) {
-	p := &WebPayIn{}
+func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string) (*WebPayIn, error) {
+	msg := "new web payIn: "
+	if author == nil {
+		return nil, errors.New(msg + "nil author")
+	}
+	if credit == nil {
+		return nil, errors.New(msg + "nil dest wallet")
+	}
+	id := ""
+	switch author.(type) {
+	case *LegalUser:
+		id = author.(*LegalUser).Id
+	case *NaturalUser:
+		id = author.(*NaturalUser).Id
+	}
+	if id == "" {
+		return nil, errors.New(msg + "author has empty Id")
+	}
+	u, err := url.Parse(returnUrl)
+	if err != nil {
+		return nil, errors.New(msg + err.Error())
+	}
+	p := &WebPayIn{
+		PayIn: PayIn{
+			AuthorId:         id,
+			DebitedFunds:     amount,
+			Fees:             fees,
+			CreditedWalletId: credit.Id,
+		},
+		ReturnUrl: u.String(),
+		CardType:  "CB_VISA_MASTERCARD",
+		Culture:   culture,
+	}
 	p.service = m
 	return p, nil
 }
@@ -101,31 +133,29 @@ func (t *WebPayIn) Save() error {
 	}
 
 	// Fields not allowed when creating a tranfer.
-	/* FIXME
-	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status"} {
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType", "SecureMode", "Type", "Nature"} {
 		delete(data, field)
 	}
 
-	tr, err := t.service.transferRequest(actionCreateWebPayIn, data)
+	tr, err := t.service.payinRequest(actionCreateWebPayIn, data)
 	if err != nil {
 		return err
 	}
 	*t = *tr
 
 	if t.Status == "FAILED" {
-		return &ErrWebPayInFailed{t.Id, t.ResultMessage}
+		return &ErrPayInFailed{t.Id, t.ResultMessage}
 	}
-	*/
 	return nil
 }
 
 // PayIn finds a payment.
 func (m *MangoPay) PayIn(id string) (*WebPayIn, error) {
-	w, err := m.payinRequest(actionFetchPayIn, JsonObject{"Id": id})
+	p, err := m.payinRequest(actionFetchPayIn, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return w, nil
+	return p, nil
 }
 
 func (m *MangoPay) payinRequest(action mangoAction, data JsonObject) (*WebPayIn, error) {
