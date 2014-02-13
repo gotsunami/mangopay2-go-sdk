@@ -229,7 +229,7 @@ Options:
 		ows := mango.ConsumerList{}
 		for _, o := range w.Owners {
 			u := new(mango.LegalUser)
-			u.User = mango.User{Id: o}
+			u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: o}}
 			ows = append(ows, u)
 		}
 		n, err := service.NewWallet(ows, w.Description, w.Currency)
@@ -261,7 +261,7 @@ Options:
 		ows := mango.ConsumerList{}
 		for _, o := range w.Owners {
 			u := new(mango.LegalUser)
-			u.User = mango.User{Id: o}
+			u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: o}}
 			ows = append(ows, u)
 		}
 		n, err := service.NewWallet(ows, w.Description, w.Currency)
@@ -294,7 +294,7 @@ Options:
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
-		u.User = mango.User{Id: t.AuthorId}
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: t.AuthorId}}
 		k, err := service.NewTransfer(u, t.DebitedFunds, t.Fees, &mango.Wallet{Id: t.DebitedWalletId}, &mango.Wallet{Id: t.CreditedWalletId})
 		if err != nil {
 			perror(err.Error())

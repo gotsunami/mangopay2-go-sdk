@@ -19,7 +19,7 @@ type LegalUser struct {
 	LegalRepresentativeLastName           string
 	LegalRepresentativeAddress            string
 	LegalRepresentativeEmail              string
-	LegalRepresentativeBirthday           int
+	LegalRepresentativeBirthday           int64
 	LegalRepresentativeNationality        string
 	LegalRepresentativeCountryOfResidence string
 	Statute                               string
@@ -34,7 +34,7 @@ func (u *LegalUser) String() string {
 Id                                      : %s
 Tag                                     : %s
 Email                                   : %s
-Creation date                           : %d
+Creation date                           : %s
 Person type                             : %s
 Name                                    : %s
 Legal Person Type                       : %s
@@ -43,17 +43,17 @@ Legal Representative FirstName          : %s
 Legal Representative LastName           : %s
 Legal Representative Address            : %s
 Legal Representative Email              : %s
-Legal Representative Birthday           : %d
+Legal Representative Birthday           : %s
 Legal Representative Nationality        : %s
 Legal Representative CountryOfResidence : %s
 Statute                                 : %s
 Proof Of Registration                   : %s
 Shareholder Declaration                 : %s
-`, u.Id, u.Tag, u.Email, u.CreationDate, u.PersonType, u.Name, u.LegalPersonType, u.HeadquartersAddress, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeAddress, u.LegalRepresentativeEmail, u.LegalRepresentativeBirthday, u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence, u.Statute, u.ProofOfRegistration, u.ShareholderDeclaration)
+`, u.Id, u.Tag, u.Email, unixTimeToString(u.CreationDate), u.PersonType, u.Name, u.LegalPersonType, u.HeadquartersAddress, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeAddress, u.LegalRepresentativeEmail, unixTimeToString(u.LegalRepresentativeBirthday), u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence, u.Statute, u.ProofOfRegistration, u.ShareholderDeclaration)
 }
 
 // NewLegalUser creates a new legal user.
-func (m *MangoPay) NewLegalUser(name string, email string, personType string, legalFirstName, legalLastName string, birthday int, nationality string, country string) *LegalUser {
+func (m *MangoPay) NewLegalUser(name string, email string, personType string, legalFirstName, legalLastName string, birthday int64, nationality string, country string) *LegalUser {
 	u := &LegalUser{
 		Name:                                  name,
 		LegalPersonType:                       personType,

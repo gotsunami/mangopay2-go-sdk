@@ -28,7 +28,7 @@ type TransferList []*Transfer
 //
 // See http://docs.mangopay.com/api-references/transfers/.
 type Transfer struct {
-	ProcessingReply
+	ProcessReply
 	AuthorId         string
 	CreditedUserId   string
 	DebitedFunds     Money
@@ -48,13 +48,13 @@ DebitedFunds     : %s
 Fees             : %s
 DebitedWalletId  : %s
 CreditedWalletId : %s
-Creation date    : %d
+Creation date    : %s
 CreditedFunds    : %s
 Status           : %s
 ResultCode       : %s
 ResultMessage    : %s
-ExecutionDate    : %d
-`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds.String(), t.Fees.String(), t.DebitedWalletId, t.CreditedWalletId, t.CreationDate, t.CreditedFunds.String(), t.Status, t.ResultCode, t.ResultMessage, t.ExecutionDate)
+ExecutionDate    : %s
+`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds.String(), t.Fees.String(), t.DebitedWalletId, t.CreditedWalletId, unixTimeToString(t.CreationDate), t.CreditedFunds.String(), t.Status, t.ResultCode, t.ResultMessage, unixTimeToString(t.ExecutionDate))
 }
 
 // NewTransfer creates a new tranfer (or transaction).
@@ -91,7 +91,7 @@ func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, 
 		Fees:             fees,
 		DebitedWalletId:  from.Id,
 		CreditedWalletId: to.Id,
-		ProcessingReply:  ProcessingReply{},
+		ProcessReply:  ProcessReply{},
 	}
 	t.service = m
 	return t, nil

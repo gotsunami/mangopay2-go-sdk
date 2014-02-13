@@ -34,7 +34,7 @@ type Wallet struct {
 	Description  string
 	Currency     string
 	Balance      Money
-	CreationDate int
+	CreationDate int64
 	service      *MangoPay
 }
 
@@ -46,8 +46,8 @@ Owners        : %s
 Description   : %s
 Currency      : %s
 Balance       : %s
-Creation date : %d
-`, u.Id, u.Tag, u.Owners, u.Description, u.Currency, u.Balance.String(), u.CreationDate)
+Creation date : %s
+`, u.Id, u.Tag, u.Owners, u.Description, u.Currency, u.Balance.String(), unixTimeToString(u.CreationDate))
 }
 
 // NewWallet creates a new wallet. Owners must have a well-defined Id. Empty Ids will

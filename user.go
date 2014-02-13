@@ -19,11 +19,9 @@ type UserList []*User
 // User is used by the user activity API and describe common fields to
 // both natural and legal users.
 type User struct {
-	PersonType   string
-	Email        string
-	Id           string
-	Tag          string
-	CreationDate int
+	ProcessIdent
+	PersonType string
+	Email      string
 }
 
 func (u *User) String() string {
@@ -32,7 +30,7 @@ Person type             : %s
 Email                   : %s
 Id                      : %s
 Tag                     : %s
-CreationDate            : %d`, u.PersonType, u.Email, u.Id, u.Tag, u.CreationDate)
+CreationDate            : %s`, u.PersonType, u.Email, u.Id, u.Tag, unixTimeToString(u.CreationDate))
 }
 
 // Users returns a list of all registered users, either natural

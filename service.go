@@ -8,15 +8,6 @@
 package mango
 
 import (
-	/*
-		"bytes"
-		"crypto"
-		"encoding/pem"
-		"io"
-		"os"
-		"strconv"
-		"time"
-	*/
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -25,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 // Request execution environment (production or sandbox).
@@ -51,15 +43,20 @@ type MangoPay struct {
 	authMethod AuthMode
 }
 
-// ProcessingReply holds commong fields part of MangoPay API replies.
-type ProcessingReply struct {
-	Id            string
-	Tag           string
-	CreationDate  int
+// ProcessIdent identifies the current operation.
+type ProcessIdent struct {
+	Id           string
+	Tag          string
+	CreationDate int64
+}
+
+// ProcessReply holds commong fields part of MangoPay API replies.
+type ProcessReply struct {
+	ProcessIdent
 	Status        string
 	ResultCode    string
 	ResultMessage string
-	ExecutionDate int
+	ExecutionDate int64
 }
 
 // NewMangoPay creates a suitable environment for accessing
@@ -181,4 +178,11 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 		return err
 	}
 	return nil
+}
+
+func unixTimeToString(t int64) string {
+	if t > 0 {
+		return time.Unix(t, 0).String()
+	}
+	return "Never"
 }

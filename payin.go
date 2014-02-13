@@ -23,7 +23,7 @@ func (e *ErrPayInFailed) Error() string {
 // PayIn holds common fields to all MangoPay's supported payment means
 // (through web, direct, preauthorized, bank wire).
 type PayIn struct {
-	ProcessingReply
+	ProcessReply
 	AuthorId         string
 	CreditedUserId   string
 	DebitedFunds     Money
