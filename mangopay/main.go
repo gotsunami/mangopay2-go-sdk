@@ -86,6 +86,7 @@ where action is one of:
   transfer*         fetch transfer info
 
   addwebpayin       create a payIn through web interface
+  payin*            fetch a payIn
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -340,6 +341,18 @@ Options:
 		}
 		fmt.Println("Web PayIn created:")
 		fmt.Println(k)
+	case "payin":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		t, err := service.PayIn(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(t)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

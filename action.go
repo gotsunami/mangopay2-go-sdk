@@ -117,6 +117,11 @@ var mangoRequests = map[mangoAction]mangoRequest{
 		"/transfers/{{Id}}",
 		JsonObject{"Id": ""},
 	},
+	actionFetchPayIn: mangoRequest{
+		"GET",
+		"/payins/{{Id}}",
+		JsonObject{"Id": ""},
+	},
 	actionCreateWebPayIn: mangoRequest{
 		"POST",
 		"/payins/card/web",
