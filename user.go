@@ -11,7 +11,10 @@ import (
 // A Consumer is a legal or natural user with zero, one or
 // more wallets.
 type Consumer interface {
+	// All user's wallets
 	Wallets() WalletList
+	// All user's transactions
+	Transfers() (TransferList, error)
 }
 
 type UserList []*User

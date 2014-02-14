@@ -19,6 +19,7 @@ const (
 	actionFetchLegalUser
 
 	actionFetchUser
+	actionFetchUserTransfers
 
 	actionCreateWallet
 	actionEditWallet
@@ -85,6 +86,11 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionFetchUser: mangoRequest{
 		"GET",
 		"/users/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchUserTransfers: mangoRequest{
+		"GET",
+		"/users/{{Id}}/transactions",
 		JsonObject{"Id": ""},
 	},
 	actionCreateWallet: mangoRequest{

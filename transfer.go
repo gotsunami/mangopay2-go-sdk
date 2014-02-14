@@ -91,7 +91,7 @@ func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, 
 		Fees:             fees,
 		DebitedWalletId:  from.Id,
 		CreditedWalletId: to.Id,
-		ProcessReply:  ProcessReply{},
+		ProcessReply:     ProcessReply{},
 	}
 	t.service = m
 	return t, nil
@@ -132,13 +132,19 @@ func (t *Transfer) Save() error {
 	return nil
 }
 
-// Transfer finds a legal user using the user_id attribute.
+// Transfer finds a transaction by id.
 func (m *MangoPay) Transfer(id string) (*Transfer, error) {
 	w, err := m.transferRequest(actionFetchTransfer, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
 	return w, nil
+}
+
+// Transfer finds all user's transactions.
+func (m *MangoPay) Transfers(user Consumer) (TransferList, error) {
+	trs, err := m.transfers(user)
+	return trs, err
 }
 
 func (m *MangoPay) transferRequest(action mangoAction, data JsonObject) (*Transfer, error) {
@@ -151,4 +157,34 @@ func (m *MangoPay) transferRequest(action mangoAction, data JsonObject) (*Transf
 		return nil, err
 	}
 	return u, nil
+}
+
+func (m *MangoPay) transferListRequest(action mangoAction, data JsonObject) (TransferList, error) {
+	resp, err := m.request(action, data)
+	if err != nil {
+		return nil, err
+	}
+	t := TransferList{}
+	if err := m.unMarshalJSONResponse(resp, &t); err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (m *MangoPay) transfers(u Consumer) (TransferList, error) {
+	id := ""
+	switch u.(type) {
+	case *LegalUser:
+		id = u.(*LegalUser).Id
+	case *NaturalUser:
+		id = u.(*NaturalUser).Id
+	}
+	if id == "" {
+		return nil, errors.New("natural user has empy Id")
+	}
+	trs, err := m.transferListRequest(actionFetchUserTransfers, JsonObject{"Id": id})
+	if err != nil {
+		return nil, err
+	}
+	return trs, nil
 }

@@ -73,6 +73,12 @@ func (u *LegalUser) Wallets() WalletList {
 	return u.wallets
 }
 
+// Transfer gets all user's transaction.
+func (u *LegalUser) Transfers() (TransferList, error) {
+	trs, err := u.service.transfers(u)
+	return trs, err
+}
+
 // Save creates or updates a legal user. The Create API is used
 // if the user's Id is an empty string. The Edit API is used when
 // the Id is a non-empty string.

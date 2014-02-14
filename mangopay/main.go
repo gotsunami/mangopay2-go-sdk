@@ -84,6 +84,7 @@ where action is one of:
 
   addtransfer*      create a new tranfer
   transfer*         fetch transfer info
+  transfers*        list all user's transactions
 
   addwebpayin       create a payIn through web interface
   payin*            fetch a payIn
@@ -322,6 +323,26 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(t)
+	case "transfers":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		trs, err := service.Transfers(u)
+		if err != nil {
+			perror(err.Error())
+		}
+		if len(trs) == 0 {
+			fmt.Println("No transfers.")
+		} else {
+			for _, tr := range trs {
+				fmt.Println(tr)
+			}
+		}
 	case "addwebpayin":
 		w := &mango.WebPayIn{}
 		if err := json.Unmarshal([]byte(*post), w); err != nil {
