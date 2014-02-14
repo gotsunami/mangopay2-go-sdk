@@ -78,9 +78,10 @@ where action is one of:
   legaluser*        fetch legal user info
 
   addwallet*        create a new wallet
-  wallet*           fetch wallet info
   editwallet*       update wallet info
   trwallet*         fetch all wallet's transactions
+  wallet*           fetch wallet info
+  wallets*          fetch all user's wallet
 
   addtransfer*      create a new tranfer
   transfer*         fetch transfer info
@@ -291,6 +292,26 @@ Options:
 		trs := w.Transactions()
 		for _, t := range trs {
 			fmt.Println(t)
+		}
+	case "wallets":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		ws, err := service.Wallets(u)
+		if err != nil {
+			perror(err.Error())
+		}
+		if len(ws) == 0 {
+			fmt.Println("No transfers.")
+		} else {
+			for _, tr := range ws {
+				fmt.Println(tr)
+			}
 		}
 	case "addtransfer":
 		t := &mango.Transfer{}

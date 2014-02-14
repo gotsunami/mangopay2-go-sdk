@@ -68,9 +68,9 @@ func (m *MangoPay) NewLegalUser(name string, email string, personType string, le
 }
 
 // Wallets returns user's wallets.
-func (u *LegalUser) Wallets() WalletList {
-	u.wallets = nil
-	return u.wallets
+func (u *LegalUser) Wallets() (WalletList, error) {
+	ws, err := u.service.wallets(u)
+	return ws, err
 }
 
 // Transfer gets all user's transaction.

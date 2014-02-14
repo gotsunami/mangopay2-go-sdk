@@ -159,3 +159,39 @@ func (m *MangoPay) walletRequest(action mangoAction, data JsonObject) (*Wallet, 
 	}
 	return u, nil
 }
+
+func (m *MangoPay) walletListRequest(action mangoAction, data JsonObject) (WalletList, error) {
+	resp, err := m.request(action, data)
+	if err != nil {
+		return nil, err
+	}
+	ws := WalletList{}
+	if err := m.unMarshalJSONResponse(resp, &ws); err != nil {
+		return nil, err
+	}
+	return ws, nil
+}
+
+func (m *MangoPay) wallets(u Consumer) (WalletList, error) {
+	id := ""
+	switch u.(type) {
+	case *LegalUser:
+		id = u.(*LegalUser).Id
+	case *NaturalUser:
+		id = u.(*NaturalUser).Id
+	}
+	if id == "" {
+		return nil, errors.New("user has empty Id")
+	}
+	trs, err := m.walletListRequest(actionFetchUserWallets, JsonObject{"Id": id})
+	if err != nil {
+		return nil, err
+	}
+	return trs, nil
+}
+
+// Wallet finds all user's wallets. Provided for convenience.
+func (m *MangoPay) Wallets(user Consumer) (WalletList, error) {
+	ws, err := m.wallets(user)
+	return ws, err
+}

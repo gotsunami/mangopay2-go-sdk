@@ -60,9 +60,9 @@ func (m *MangoPay) NewNaturalUser(first, last string, email string, birthday int
 }
 
 // Wallets returns user's wallets.
-func (u *NaturalUser) Wallets() WalletList {
-	u.wallets = nil
-	return u.wallets
+func (u *NaturalUser) Wallets() (WalletList, error) {
+	ws, err := u.service.wallets(u)
+	return ws, err
 }
 
 // Transfer gets all user's transaction.

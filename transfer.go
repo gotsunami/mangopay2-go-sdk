@@ -141,7 +141,7 @@ func (m *MangoPay) Transfer(id string) (*Transfer, error) {
 	return w, nil
 }
 
-// Transfer finds all user's transactions.
+// Transfer finds all user's transactions. Provided for convenience.
 func (m *MangoPay) Transfers(user Consumer) (TransferList, error) {
 	trs, err := m.transfers(user)
 	return trs, err
@@ -180,7 +180,7 @@ func (m *MangoPay) transfers(u Consumer) (TransferList, error) {
 		id = u.(*NaturalUser).Id
 	}
 	if id == "" {
-		return nil, errors.New("natural user has empy Id")
+		return nil, errors.New("user has empty Id")
 	}
 	trs, err := m.transferListRequest(actionFetchUserTransfers, JsonObject{"Id": id})
 	if err != nil {
