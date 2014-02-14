@@ -171,7 +171,12 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 	}
 	if m.verbosity == Debug {
 		fmt.Println(">>>>>>>>>>>>>>>>>>>>>> DEBUG RESPONSE")
-		fmt.Println("Raw body:", string(b))
+		for k, v := range resp.Header {
+			for _, j := range v {
+				fmt.Printf("%s: %v\n", k, j)
+			}
+		}
+		fmt.Printf("\n%s\n", string(b))
 		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG RESPONSE")
 	}
 	if err := json.Unmarshal(b, v); err != nil {

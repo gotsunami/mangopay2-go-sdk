@@ -87,7 +87,7 @@ where action is one of:
   transfer*         fetch transfer info
   transfers*        list all user's transactions
 
-  addwebpayin       create a payIn through web interface
+  addwebpayin*      create a payIn through web interface
   payin*            fetch a payIn
 
 Actions with an asterisk(*) require input JSON data (-d).
