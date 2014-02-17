@@ -90,6 +90,8 @@ where action is one of:
   addwebpayin*      create a payIn through web interface
   payin*            fetch a payIn
 
+  addcard*          register a credit card
+
 Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
@@ -320,7 +322,13 @@ Options:
 		}
 		u := new(mango.LegalUser)
 		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: t.AuthorId}}
-		k, err := service.NewTransfer(u, t.DebitedFunds, t.Fees, &mango.Wallet{Id: t.DebitedWalletId}, &mango.Wallet{Id: t.CreditedWalletId})
+		k, err := service.NewTransfer(u, t.DebitedFunds, t.Fees,
+			&mango.Wallet{
+				ProcessIdent: mango.ProcessIdent{Id: t.DebitedWalletId},
+			},
+			&mango.Wallet{
+				ProcessIdent: mango.ProcessIdent{Id: t.CreditedWalletId},
+			})
 		if err != nil {
 			perror(err.Error())
 		}
@@ -371,7 +379,11 @@ Options:
 		}
 		u := new(mango.LegalUser)
 		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: w.AuthorId}}
-		k, err := service.NewWebPayIn(u, w.DebitedFunds, w.Fees, &mango.Wallet{Id: w.CreditedWalletId}, w.ReturnUrl, w.Culture)
+		k, err := service.NewWebPayIn(u, w.DebitedFunds, w.Fees,
+			&mango.Wallet{
+				ProcessIdent: mango.ProcessIdent{Id: w.CreditedWalletId},
+			},
+			w.ReturnUrl, w.Culture)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -395,6 +407,22 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(t)
+	case "addcard":
+		c := &mango.CardRegistration{}
+		if err := json.Unmarshal([]byte(*post), c); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: c.Id}}
+		r, err := service.NewCardRegistration(u, c.Currency)
+		if err != nil {
+			perror(err.Error())
+		}
+		if err := r.Register(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Card registration:")
+		fmt.Println(r)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

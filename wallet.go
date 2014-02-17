@@ -30,14 +30,12 @@ func (b *Money) String() string {
 // Wallet stores all payins and tranfers from users in order to
 // collect money.
 type Wallet struct {
-	Id           string
-	Tag          string
-	Owners       []string
-	Description  string
-	Currency     string
-	Balance      Money
-	CreationDate int64
-	service      *MangoPay
+	ProcessIdent
+	Owners      []string
+	Description string
+	Currency    string
+	Balance     Money
+	service     *MangoPay
 }
 
 func (u *Wallet) String() string {
