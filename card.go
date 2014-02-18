@@ -56,10 +56,46 @@ CardRegistrationUrl     : %s
 CardRegistrationData    : %s
 CardType                : %s
 CardId                  : %s
-`, c.Id, c.Tag, unixTimeToString(c.CreationDate), c.ResultCode, c.ResultMessage, c.Status, c.UserId, c.Currency, c.AccessKey, c.PreregistrationData, c.CardRegistrationUrl, c.CardRegistrationData, c.CardType, c.CardId)
+`, c.Id, c.Tag, unixTimeToString(c.CreationDate), c.ResultCode, c.ResultMessage,
+		c.Status, c.UserId, c.Currency, c.AccessKey, c.PreregistrationData,
+		c.CardRegistrationUrl, c.CardRegistrationData, c.CardType, c.CardId)
 }
 
-// NewCardRegistration creates a new credit card registration process.
+// NewCardRegistration creates a new credit card registration object that can
+// be used to register a new credit card for a given user.
+//
+// Registering a new credit card involves the following workflow:
+//
+//  1. Create a new CardRegistration object
+//  2. Call .Init() to pre-register the card against MangoPay services and get
+//     access tokens required to register the credit card againts an external
+//     banking service
+//  3. Insert those tokens in an HTML form submitted by the user directly to
+//     the external banking service
+//  4. Get the final token from the external banking service
+//  5. Call .Register() with this token to commit credit card registration at
+//     MangoPay
+//
+// See http://docs.mangopay.com/api-references/card-registration/
+//
+// Example:
+//
+//  user := NewNaturalUser(...)
+//  cr, err := NewCardRegistration(user, "EUR")
+//  if err != nil {
+//      log.Fatal(err)
+//  }
+//  if err := cr.Init(); err != nil {
+//      log.Fatal(err)
+//  }}
+//
+// Now render an HTML form for user card details (see Init()). Once submitted,
+// you get the final token as a string starting with "data=". Use this token to
+// finally register the card:
+//
+//  if err := cr.Register(token); err != nil {
+//      log.Fatal(err)
+//  }}
 func (m *MangoPay) NewCardRegistration(user Consumer, currency string) (*CardRegistration, error) {
 	id := ""
 	switch user.(type) {
