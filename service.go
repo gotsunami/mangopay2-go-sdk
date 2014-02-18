@@ -79,8 +79,6 @@ func (m *MangoPay) Option(opts ...option) {
 
 // request prepares and sends a well formatted HTTP request to the
 // mangopay service.
-// TODO: only basic access auth supported at the moment. Add support
-// for OAuth2.0.
 func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, error) {
 	mr, ok := mangoRequests[ma]
 	if !ok {
@@ -101,28 +99,39 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 		path = mr.Path
 	}
 
-	uri, err := url.Parse(fmt.Sprintf("%s%s%s", s.rootURL, s.clientId, path))
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a request with body
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(mr.Method, uri.String(), strings.NewReader(string(body)))
+	resp, err := s.rawRequest(mr.Method, "application/json",
+		fmt.Sprintf("%s%s%s", s.rootURL, s.clientId, path), body, true)
+	return resp, err
+}
+
+// rawRequest sends an HTTP request with method method to an arbitrary URI.
+func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byte, useAuth bool) (*http.Response, error) {
+	if contentType == "" {
+		return nil, errors.New("empty request's content type")
+	}
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(method, u.String(), strings.NewReader(string(body)))
 	if err != nil {
 		return nil, err
 	}
 
 	// Set header for basic auth
-	credential := s.clientId + ":" + s.password
-	credential = base64.StdEncoding.EncodeToString([]byte(credential))
-	req.Header.Set("Authorization", "Basic "+credential)
-
-	// Post the data
-	req.Header.Set("Content-Type", "application/json")
+	if useAuth {
+		// TODO: only basic access auth supported at the moment. Add support
+		// for OAuth2.0.
+		credential := s.clientId + ":" + s.password
+		credential = base64.StdEncoding.EncodeToString([]byte(credential))
+		req.Header.Set("Authorization", "Basic "+credential)
+	}
+	req.Header.Set("Content-Type", contentType)
 
 	if s.verbosity == Debug {
 		fmt.Println(">>>>>>>>>>>>>>>>>>>>>> DEBUG REQUEST")
@@ -171,6 +180,7 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 	}
 	if m.verbosity == Debug {
 		fmt.Println(">>>>>>>>>>>>>>>>>>>>>> DEBUG RESPONSE")
+		fmt.Printf("Status code: %d\n\n", resp.StatusCode)
 		for k, v := range resp.Header {
 			for _, j := range v {
 				fmt.Printf("%s: %v\n", k, j)

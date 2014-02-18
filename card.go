@@ -8,6 +8,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/url"
+	"strings"
 )
 
 // CardRegistration is used to register a credit card.
@@ -32,8 +35,11 @@ type CardRegistration struct {
 	CardType             string
 	// CardId if part of the reply, once the CardRegistration has been
 	// edited with the CardRegistrationData.
-	CardId  string
+	CardId string
+
 	service *MangoPay
+	// true after Init() is successful.
+	isInitialized bool
 }
 
 func (c *CardRegistration) String() string {
@@ -68,17 +74,30 @@ func (m *MangoPay) NewCardRegistration(user Consumer, currency string) (*CardReg
 		return nil, errors.New("empty user ID. Unable to create card registration.")
 	}
 	cr := &CardRegistration{
-		UserId:       id,
-		Currency:     currency,
-		ProcessReply: ProcessReply{},
+		UserId:        id,
+		Currency:      currency,
+		ProcessReply:  ProcessReply{},
+		isInitialized: false,
 	}
 	cr.service = m
 	return cr, nil
 }
 
-// Register initiates the process of getting pre-registration data and access
-// key to allow a user to post his credit cart info the CardRegistrationUrl.
-func (c *CardRegistration) Register() error {
+// Init initiates the process of getting pre-registration data and access
+// key from MangoPay to allow a user to post his credit card info to the
+// c.CardRegistrationUrl (which is an external banking service).
+//
+// User's card details must be sent directly through an HTML form to the
+// c.CardRegistrationUrl.
+//
+// The HTML form must have the following input fields:
+//  - "data" (hidden) equals to c.PreregistrationData
+//  - "accessKeyRef" (hidden) equals to c.AccessKey
+//  - "cardNumber" equals to the user's credit card number
+//  - "cardExpirationDate" equals to the user's card expiration date (format: MMYY)
+//  - "cardCvx" equals to user's 3-digits cvx code
+//  - "returnURL" so we can retrieve the final registration data token
+func (c *CardRegistration) Init() error {
 	data := JsonObject{}
 	j, err := json.Marshal(c)
 	if err != nil {
@@ -105,25 +124,89 @@ func (c *CardRegistration) Register() error {
 	if err != nil {
 		return err
 	}
+	// Backup private service
+	service := c.service
 	*c = *cr
+	c.service = service
+
+	// Okay for step 2.
+	c.isInitialized = true
 	return nil
 }
 
-// SendRegistrationData sends a request with rdata to get the CardID
-// ready to be used for a direct payIn.
-func (c *CardRegistration) SendRegistrationData(rdata string) error {
-	if c.Id == "" {
-		return errors.New("empty card registration Id. Can't send registration data.")
+// SendRegistrationData sends the user's card number, expiration date and cvx and
+// returns the registration data token at the specified returnUrl.
+//
+// Note that this method is for __testing__ only! It must NOT be used directly other
+// than for testing purposes. Indeed, user's card details must be sent directly
+// through an HTML form to the CardRegistrationUrl (which is an external banking
+// service).
+// In this case, a returnUrl must be provided so that we get the response with the
+// CardRegistration token.
+//
+// Must be called after a successful call to Init().
+func (c *CardRegistration) SendRegistrationData(cardNumber, expirationDate, cvx string, returnUrl string) (string, error) {
+	if !c.isInitialized {
+		return "", errors.New("missing pre-registration data and access key. Was the Register() call successful?")
 	}
-	if rdata == "" {
-		return errors.New("empty registration data supplied.")
+	// Step 2. Prepare a request to the CardRegistrationUrl (external banking service)
+	data := url.Values{
+		"data":               []string{c.PreregistrationData},
+		"accessKeyRef":       []string{c.AccessKey},
+		"cardNumber":         []string{cardNumber},
+		"cardExpirationDate": []string{expirationDate},
+		"cardCvx":            []string{cvx},
+	}
+	if returnUrl != "" {
+		data["returnURL"] = []string{returnUrl}
 	}
 
-	cr, err := c.service.cardRegistartionRequest(actionSendCardRegistrationData, JsonObject{"Id": c.Id, "CardRegistrationData": rdata})
+	// Do NOT send our mango credentials (basic auth) to an external banking service
+	resp, err := c.service.rawRequest("POST", "application/x-www-form-urlencoded",
+		c.CardRegistrationUrl, []byte(data.Encode()), false)
+	if err != nil {
+		return "", err
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return "", err
+	}
+	if c.service.verbosity == Debug {
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>> DEBUG RESPONSE")
+		fmt.Printf("Status code: %d\n\n", resp.StatusCode)
+		for k, v := range resp.Header {
+			for _, j := range v {
+				fmt.Printf("%s: %v\n", k, j)
+			}
+		}
+		fmt.Printf("\n%s\n", string(b))
+		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG RESPONSE")
+	}
+	c.CardRegistrationData = string(b)
+	return c.CardRegistrationData, nil
+}
+
+// Register effectively registers the credit card to the MangoPay service. The
+// registrationData value is returned by the external banking service that deals with
+// the credit card information, and is obtained by submitting an HTML form to
+// the external banking service.
+func (c *CardRegistration) Register(registrationData string) error {
+	if !strings.HasPrefix(registrationData, "data=") {
+		return errors.New("invalid registration data. Must start with data=")
+	}
+	cr, err := c.service.cardRegistartionRequest(actionSendCardRegistrationData,
+		JsonObject{"Id": c.Id, "RegistrationData": registrationData})
 	if err != nil {
 		return err
 	}
+	// Backup private members
+	serv := c.service
+	isr := c.isInitialized
 	*c = *cr
+	c.CardRegistrationData = registrationData
+	c.service = serv
+	c.isInitialized = isr
 	return nil
 }
 

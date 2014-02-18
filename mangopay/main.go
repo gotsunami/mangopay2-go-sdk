@@ -414,15 +414,28 @@ Options:
 		}
 		u := new(mango.LegalUser)
 		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: c.Id}}
-		r, err := service.NewCardRegistration(u, c.Currency)
+		card, err := service.NewCardRegistration(u, c.Currency)
 		if err != nil {
 			perror(err.Error())
 		}
-		if err := r.Register(); err != nil {
+		if err := card.Init(); err != nil {
 			perror(err.Error())
 		}
 		fmt.Println("Card registration:")
-		fmt.Println(r)
+		fmt.Println(card)
+
+		fmt.Println("Sending credit card info for registering this test card:")
+		num, date, ccv := "4929683808277688", "0217", "184"
+		// Empty return URL supplied to get the answer directly
+		fmt.Println("Okay! now registering the card to MangoPay...")
+		rdata, err := card.SendRegistrationData(num, date, ccv, "")
+		if err != nil {
+			perror(err.Error())
+		}
+		if err := card.Register(rdata); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(card)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))
