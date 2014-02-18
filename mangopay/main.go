@@ -14,8 +14,10 @@ import (
 	"fmt"
 	"github.com/matm/mangopay2-go-sdk"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
-	_ "strconv"
+	"strings"
 )
 
 // JSON config read from config file
@@ -35,6 +37,42 @@ func (c *config) String() string {
 func perror(msg string) {
 	fmt.Fprintf(os.Stderr, "error: %s\n", msg)
 	os.Exit(1)
+}
+
+// sendRegistrationData sends the user's card number, expiration date and cvx and
+// returns the registration data token at the specified returnUrl.
+//
+// Note that this function is for __testing__ only as this is NOT the correct
+// way to proceed. Indeed, user's card details must be sent directly
+// through an HTML form to the CardRegistrationUrl (which is an external banking
+// service).
+func sendRegistrationData(c *mango.CardRegistration, cardNumber,
+	expirationDate, cvx string) (string, error) {
+	data := url.Values{
+		"data":               []string{c.PreregistrationData},
+		"accessKeyRef":       []string{c.AccessKey},
+		"cardNumber":         []string{cardNumber},
+		"cardExpirationDate": []string{expirationDate},
+		"cardCvx":            []string{cvx},
+	}
+
+	req, err := http.NewRequest("POST", c.CardRegistrationUrl,
+		strings.NewReader(string([]byte(data.Encode()))))
+	if err != nil {
+		return "", err
+	}
+	resp, err := http.DefaultClient.Do(req)
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New(fmt.Sprintf("Error code %d: %v", resp.StatusCode, err))
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return "", err
+	}
+	c.CardRegistrationData = string(b)
+	return c.CardRegistrationData, nil
 }
 
 // Parse config file
@@ -426,9 +464,11 @@ Options:
 
 		fmt.Println("Sending credit card info for registering this test card:")
 		num, date, ccv := "4929683808277688", "0217", "184"
-		// Empty return URL supplied to get the answer directly
+
 		fmt.Println("Okay! now registering the card to MangoPay...")
-		rdata, err := card.SendRegistrationData(num, date, ccv, "")
+		// Simulates a user-supplied HTML form POST to the external
+		// bank service.
+		rdata, err := sendRegistrationData(card, num, date, ccv)
 		if err != nil {
 			perror(err.Error())
 		}
