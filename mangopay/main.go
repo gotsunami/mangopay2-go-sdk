@@ -129,6 +129,7 @@ where action is one of:
   payin*            fetch a payIn
 
   addcard*          register a credit card
+  card*             fetch a credit card
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -476,6 +477,18 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(card)
+	case "card":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		c, err := service.Card(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println(c)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

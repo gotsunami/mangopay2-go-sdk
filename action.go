@@ -35,6 +35,8 @@ const (
 
 	actionCreateCardRegistration
 	actionSendCardRegistrationData
+
+	actionFetchCard
 )
 
 // JsonObject is used to manage JSON data.
@@ -150,6 +152,11 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionSendCardRegistrationData: mangoRequest{
 		"PUT",
 		"/CardRegistrations/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchCard: mangoRequest{
+		"GET",
+		"/cards/{{Id}}",
 		JsonObject{"Id": ""},
 	},
 }

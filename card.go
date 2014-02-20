@@ -61,6 +61,46 @@ CardId                  : %s
 		c.CardRegistrationUrl, c.CardRegistrationData, c.CardType, c.CardId)
 }
 
+// Card holds all credit card details.
+type Card struct {
+	ProcessIdent
+	ExpirationDate string // MMYY
+	Alias          string // Obfuscated card number, i.e 497010XXXXXX4414
+	CardProvider   string // CB, VISA, MASTERCARD etc.
+	CardType       string // CB_VISA_MASTERCARD
+	Product        string
+	BankCode       string
+	Active         bool
+	Currency       string // Currency accepted in the waller, i.e EUR, USD etc.
+	Validity       string // UNKNOWN, VALID, INVALID
+}
+
+func (c *Card) String() string {
+	return fmt.Sprintf(`
+Id                      : %s
+Tag                     : %s
+CreationDate            : %s
+ExpirationDate          : %s
+Alias                   : %s
+CardProvider            : %s
+CardType                : %s
+Product                 : %s
+BankCode                : %s
+Active                  : %v
+Currency                : %s
+Validity                : %s
+`, c.Id, c.Tag, unixTimeToString(c.CreationDate), c.ExpirationDate, c.Alias, c.CardProvider, c.CardType, c.Product, c.BankCode, c.Active, c.Currency, c.Validity)
+}
+
+// Card fetches a registered credit card.
+func (m *MangoPay) Card(id string) (*Card, error) {
+	c, err := m.cardRequest(actionFetchCard, JsonObject{"Id": id})
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
 // NewCardRegistration creates a new credit card registration object that can
 // be used to register a new credit card for a given user.
 //
@@ -207,4 +247,16 @@ func (m *MangoPay) cardRegistartionRequest(action mangoAction, data JsonObject) 
 		return nil, err
 	}
 	return u, nil
+}
+
+func (m *MangoPay) cardRequest(action mangoAction, data JsonObject) (*Card, error) {
+	resp, err := m.request(action, data)
+	if err != nil {
+		return nil, err
+	}
+	c := new(Card)
+	if err := m.unMarshalJSONResponse(resp, c); err != nil {
+		return nil, err
+	}
+	return c, nil
 }
