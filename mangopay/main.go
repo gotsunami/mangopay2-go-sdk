@@ -119,7 +119,7 @@ where action is one of:
   editwallet*       update wallet info
   trwallet*         fetch all wallet's transactions
   wallet*           fetch wallet info
-  wallets*          fetch all user's wallet
+  wallets*          list all user's wallet
 
   addtransfer*      create a new tranfer
   transfer*         fetch transfer info
@@ -131,6 +131,7 @@ where action is one of:
 
   addcard*          register a credit card
   card*             fetch a credit card
+  cards*            list all user's cards
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -514,6 +515,26 @@ Options:
 		}
 		fmt.Println("Direct PayIn created:")
 		fmt.Println(k)
+	case "cards":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		cs, err := service.Cards(u)
+		if err != nil {
+			perror(err.Error())
+		}
+		if len(cs) == 0 {
+			fmt.Println("No card.")
+		} else {
+			for _, c := range cs {
+				fmt.Println(c)
+			}
+		}
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

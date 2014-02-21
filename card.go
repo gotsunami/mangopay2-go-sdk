@@ -11,6 +11,9 @@ import (
 	"strings"
 )
 
+// List of cards.
+type CardList []*Card
+
 // CardRegistration is used to register a credit card.
 //
 // http://docs.mangopay.com/api-references/card-registration/
@@ -99,6 +102,29 @@ func (m *MangoPay) Card(id string) (*Card, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+// Card finds all user's cards.
+func (m *MangoPay) Cards(user Consumer) (CardList, error) {
+	id := ""
+	switch user.(type) {
+	case *LegalUser:
+		id = user.(*LegalUser).Id
+	case *NaturalUser:
+		id = user.(*NaturalUser).Id
+	}
+	if id == "" {
+		return nil, errors.New("user has empty Id")
+	}
+	resp, err := m.request(actionFetchUserCards, JsonObject{"Id": id})
+	if err != nil {
+		return nil, err
+	}
+	cl := CardList{}
+	if err := m.unMarshalJSONResponse(resp, &cl); err != nil {
+		return nil, err
+	}
+	return cl, nil
 }
 
 // NewCardRegistration creates a new credit card registration object that can
