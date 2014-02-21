@@ -126,6 +126,7 @@ where action is one of:
   transfers*        list all user's transactions
 
   addwebpayin*      create a payIn through web interface
+  adddirectpayin*   create a direct payIn (with tokenized card)
   payin*            fetch a payIn
 
   addcard*          register a credit card
@@ -489,6 +490,30 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(c)
+	case "adddirectpayin":
+		w := &mango.DirectPayIn{}
+		if err := json.Unmarshal([]byte(*post), w); err != nil {
+			perror(err.Error())
+		}
+		from := new(mango.LegalUser)
+		from.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: w.AuthorId}}
+		to := new(mango.LegalUser)
+		to.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: w.CreditedUserId}}
+		card := mango.Card{ProcessIdent: mango.ProcessIdent{Id: w.CardId}}
+		wallet := mango.Wallet{ProcessIdent: mango.ProcessIdent{Id: w.CreditedWalletId}}
+		k, err := service.NewDirectPayIn(from, to, &card, &wallet,
+			w.DebitedFunds, w.Fees, w.SecureModeReturnUrl)
+		if err != nil {
+			perror(err.Error())
+		}
+		if err := k.Save(); err != nil {
+			if _, ok := err.(*mango.ErrPayInFailed); ok {
+				fmt.Println(k)
+			}
+			perror(err.Error())
+		}
+		fmt.Println("Direct PayIn created:")
+		fmt.Println(k)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))
