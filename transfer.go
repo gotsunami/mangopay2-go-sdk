@@ -40,21 +40,7 @@ type Transfer struct {
 }
 
 func (t *Transfer) String() string {
-	return fmt.Sprintf(`
-Id               : %s
-Tag              : %s
-CreditedUserId   : %s
-DebitedFunds     : %s
-Fees             : %s
-DebitedWalletId  : %s
-CreditedWalletId : %s
-Creation date    : %s
-CreditedFunds    : %s
-Status           : %s
-ResultCode       : %s
-ResultMessage    : %s
-ExecutionDate    : %s
-`, t.Id, t.Tag, t.CreditedUserId, t.DebitedFunds.String(), t.Fees.String(), t.DebitedWalletId, t.CreditedWalletId, unixTimeToString(t.CreationDate), t.CreditedFunds.String(), t.Status, t.ResultCode, t.ResultMessage, unixTimeToString(t.ExecutionDate))
+	return struct2string(t)
 }
 
 // NewTransfer creates a new tranfer (or transaction).

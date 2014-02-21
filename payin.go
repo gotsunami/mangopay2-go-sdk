@@ -48,29 +48,7 @@ type DirectPayIn struct {
 }
 
 func (p *DirectPayIn) String() string {
-	return fmt.Sprintf(`
-Id                  : %s
-Tag                 : %s
-AuthorId            : %s
-DebitedFunds        : %s
-Fees                : %s
-CreditedWalletId    : %s
-SecureMode          : %s
-CreationDate        : %s
-CreditedFunds       : %s
-CreditedUserId      : %s
-Status              : %s
-ResultCode          : %s
-ResultMessage       : %s
-ExecutionDate       : %s
-Type                : %s
-Nature              : %s
-PaymentType         : %s
-ExecutionType       : %s
-SecureModeReturnUrl : %s
-CardId              : %s
-DebitedWalletId     : %s
-`, p.Id, p.Tag, p.AuthorId, p.DebitedFunds.String(), p.Fees.String(), p.CreditedWalletId, p.SecureMode, unixTimeToString(p.CreationDate), p.CreditedFunds.String(), p.CreditedUserId, p.Status, p.ResultCode, p.ResultMessage, unixTimeToString(p.ExecutionDate), p.Type, p.Nature, p.PaymentType, p.ExecutionType, p.SecureModeReturnUrl, p.CardId, p.DebitedWalletId)
+	return struct2string(p)
 }
 
 // WebPayIn hold details about making a payment through a web interface.
@@ -86,30 +64,7 @@ type WebPayIn struct {
 }
 
 func (p *WebPayIn) String() string {
-	return fmt.Sprintf(`
-Id               : %s
-Tag              : %s
-AuthorId         : %s
-DebitedFunds     : %s
-Fees             : %s
-CreditedWalletId : %s
-ReturnUrl        : %s
-Culture          : %s
-CardType         : %s
-SecureMode       : %s
-CreationDate     : %s
-CreditedFunds    : %s
-CreditedUserId   : %s
-Status           : %s
-ResultCode       : %s
-ResultMessage    : %s
-ExecutionDate    : %s
-Type             : %s 
-Nature           : %s
-PaymentType      : %s
-ExecutionType    : %s
-RedirectUrl      : %s
-`, p.Id, p.Tag, p.AuthorId, p.DebitedFunds.String(), p.Fees.String(), p.CreditedWalletId, p.ReturnUrl, p.Culture, p.CardType, p.SecureMode, unixTimeToString(p.CreationDate), p.CreditedFunds.String(), p.CreditedUserId, p.Status, p.ResultCode, p.ResultMessage, unixTimeToString(p.ExecutionDate), p.Type, p.Nature, p.PaymentType, p.ExecutionType, p.RedirectUrl)
+	return struct2string(p)
 }
 
 // NewWebPayIn creates a new payment.

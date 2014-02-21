@@ -8,6 +8,7 @@
 package mango
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -15,6 +16,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -200,4 +202,29 @@ func unixTimeToString(t int64) string {
 		return time.Unix(t, 0).String()
 	}
 	return "Never"
+}
+
+// Use reflection to print data structures.
+func struct2string(c interface{}) string {
+	var b bytes.Buffer
+	e := reflect.ValueOf(c).Elem()
+	for i := 0; i < e.NumField(); i++ {
+		sfield := e.Type().Field(i)
+		// Skip unexported fields
+		if sfield.PkgPath != "" {
+			continue
+		}
+		name := sfield.Name
+		val := e.Field(i).Interface()
+		// Handle embedded types
+		if sfield.Anonymous {
+			b.Write([]byte(struct2string(e.Field(i).Addr().Interface())))
+		} else {
+			if name == "CreationDate" || name == "ExecutionDate" {
+				val = unixTimeToString(val.(int64))
+			}
+			b.Write([]byte(fmt.Sprintf("%-24s: %v\n", name, val)))
+		}
+	}
+	return b.String()
 }

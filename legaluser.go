@@ -6,7 +6,6 @@ package mango
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // LegalUser describes all the properties of a MangoPay legal user object.
@@ -30,26 +29,7 @@ type LegalUser struct {
 }
 
 func (u *LegalUser) String() string {
-	return fmt.Sprintf(`
-Id                                      : %s
-Tag                                     : %s
-Email                                   : %s
-Creation date                           : %s
-Person type                             : %s
-Name                                    : %s
-Legal Person Type                       : %s
-Headquarters Address                    : %s
-Legal Representative FirstName          : %s
-Legal Representative LastName           : %s
-Legal Representative Address            : %s
-Legal Representative Email              : %s
-Legal Representative Birthday           : %s
-Legal Representative Nationality        : %s
-Legal Representative CountryOfResidence : %s
-Statute                                 : %s
-Proof Of Registration                   : %s
-Shareholder Declaration                 : %s
-`, u.Id, u.Tag, u.Email, unixTimeToString(u.CreationDate), u.PersonType, u.Name, u.LegalPersonType, u.HeadquartersAddress, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeAddress, u.LegalRepresentativeEmail, unixTimeToString(u.LegalRepresentativeBirthday), u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence, u.Statute, u.ProofOfRegistration, u.ShareholderDeclaration)
+	return struct2string(u)
 }
 
 // NewLegalUser creates a new legal user.

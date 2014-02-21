@@ -23,7 +23,7 @@ type Money struct {
 	Amount   int // in cents, i.e 120 for 1.20 EUR
 }
 
-func (b *Money) String() string {
+func (b Money) String() string {
 	return fmt.Sprintf("%.2f %s", float64(b.Amount/100), b.Currency)
 }
 
@@ -39,15 +39,7 @@ type Wallet struct {
 }
 
 func (u *Wallet) String() string {
-	return fmt.Sprintf(`
-Id            : %s
-Tag           : %s
-Owners        : %s
-Description   : %s
-Currency      : %s
-Balance       : %s
-Creation date : %s
-`, u.Id, u.Tag, u.Owners, u.Description, u.Currency, u.Balance.String(), unixTimeToString(u.CreationDate))
+	return struct2string(u)
 }
 
 // NewWallet creates a new wallet. Owners must have a well-defined Id. Empty Ids will

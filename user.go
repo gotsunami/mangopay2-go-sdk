@@ -4,9 +4,7 @@
 
 package mango
 
-import (
-	"fmt"
-)
+import ()
 
 // A Consumer is a legal or natural user with zero, one or
 // more wallets and tranfers.
@@ -28,12 +26,7 @@ type User struct {
 }
 
 func (u *User) String() string {
-	return fmt.Sprintf(`
-Person type             : %s
-Email                   : %s
-Id                      : %s
-Tag                     : %s
-CreationDate            : %s`, u.PersonType, u.Email, u.Id, u.Tag, unixTimeToString(u.CreationDate))
+	return struct2string(u)
 }
 
 // Users returns a list of all registered users, either natural

@@ -7,7 +7,6 @@ package mango
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -44,24 +43,7 @@ type CardRegistration struct {
 }
 
 func (c *CardRegistration) String() string {
-	return fmt.Sprintf(`
-Id                      : %s
-Tag                     : %s
-CreationDate            : %s
-ResultCode              : %s
-ResultMessage           : %s
-Status                  : %s
-UserId                  : %s
-Currency                : %s
-AccessKey               : %s
-PreregistrationData     : %s
-CardRegistrationUrl     : %s
-CardRegistrationData    : %s
-CardType                : %s
-CardId                  : %s
-`, c.Id, c.Tag, unixTimeToString(c.CreationDate), c.ResultCode, c.ResultMessage,
-		c.Status, c.UserId, c.Currency, c.AccessKey, c.PreregistrationData,
-		c.CardRegistrationUrl, c.CardRegistrationData, c.CardType, c.CardId)
+	return struct2string(c)
 }
 
 // Card holds all credit card details.
@@ -79,20 +61,7 @@ type Card struct {
 }
 
 func (c *Card) String() string {
-	return fmt.Sprintf(`
-Id                      : %s
-Tag                     : %s
-CreationDate            : %s
-ExpirationDate          : %s
-Alias                   : %s
-CardProvider            : %s
-CardType                : %s
-Product                 : %s
-BankCode                : %s
-Active                  : %v
-Currency                : %s
-Validity                : %s
-`, c.Id, c.Tag, unixTimeToString(c.CreationDate), c.ExpirationDate, c.Alias, c.CardProvider, c.CardType, c.Product, c.BankCode, c.Active, c.Currency, c.Validity)
+	return struct2string(c)
 }
 
 // Card fetches a registered credit card.

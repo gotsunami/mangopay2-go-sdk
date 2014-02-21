@@ -6,7 +6,6 @@ package mango
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // NaturalUser describes all the properties of a MangoPay natural user object.
@@ -26,23 +25,7 @@ type NaturalUser struct {
 }
 
 func (u *NaturalUser) String() string {
-	return fmt.Sprintf(`
-Id                      : %s
-Tag                     : %s
-First name              : %s
-Last name               : %s
-Email                   : %s
-Address                 : %s
-Birthday                : %d
-Nationality             : %s
-Country of residence    : %s
-Occupation              : %s
-Income range            : %s
-Proof of identity       : %s
-Proof of address        : %s
-Creation date           : %d
-Person type             : %s
-`, u.Id, u.Tag, u.FirstName, u.LastName, u.Email, u.Address, u.Birthday, u.Nationality, u.CountryOfResidence, u.Occupation, u.IncomeRange, u.ProofOfIdentity, u.ProofOfAddress, u.CreationDate, u.PersonType)
+	return struct2string(u)
 }
 
 // NewNaturalUser creates a new natural user.
