@@ -102,31 +102,21 @@ func (u *NaturalUser) Save() error {
 		}
 	}
 
-	user, err := u.service.naturalUserRequest(action, data)
+	user, err := u.service.anyRequest(new(NaturalUser), action, data)
 	if err != nil {
 		return err
 	}
-	*u = *user
+	serv := u.service
+	*u = *(user.(*NaturalUser))
+	u.service = serv
 	return nil
 }
 
 // NaturalUser finds a natural user using the user_id attribute.
 func (m *MangoPay) NaturalUser(id string) (*NaturalUser, error) {
-	u, err := m.naturalUserRequest(actionFetchNaturalUser, JsonObject{"Id": id})
+	u, err := m.anyRequest(new(NaturalUser), actionFetchNaturalUser, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return u, nil
-}
-
-func (m *MangoPay) naturalUserRequest(action mangoAction, data JsonObject) (*NaturalUser, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(NaturalUser)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
+	return u.(*NaturalUser), nil
 }

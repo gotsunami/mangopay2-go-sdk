@@ -117,11 +117,13 @@ func (w *Wallet) Save() error {
 		}
 	}
 
-	wallet, err := w.service.walletRequest(action, data)
+	wallet, err := w.service.anyRequest(new(Wallet), action, data)
 	if err != nil {
 		return err
 	}
-	*w = *wallet
+	serv := w.service
+	*w = *(wallet.(*Wallet))
+	w.service = serv
 	return nil
 }
 
@@ -131,35 +133,11 @@ func (w *Wallet) Transactions() TransferList {
 
 // Wallet finds a legal user using the user_id attribute.
 func (m *MangoPay) Wallet(id string) (*Wallet, error) {
-	w, err := m.walletRequest(actionFetchWallet, JsonObject{"Id": id})
+	w, err := m.anyRequest(new(Wallet), actionFetchWallet, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return w, nil
-}
-
-func (m *MangoPay) walletRequest(action mangoAction, data JsonObject) (*Wallet, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(Wallet)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (m *MangoPay) walletListRequest(action mangoAction, data JsonObject) (WalletList, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	ws := WalletList{}
-	if err := m.unMarshalJSONResponse(resp, &ws); err != nil {
-		return nil, err
-	}
-	return ws, nil
+	return w.(*Wallet), nil
 }
 
 func (m *MangoPay) wallets(u Consumer) (WalletList, error) {
@@ -173,11 +151,11 @@ func (m *MangoPay) wallets(u Consumer) (WalletList, error) {
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	trs, err := m.walletListRequest(actionFetchUserWallets, JsonObject{"Id": id})
+	trs, err := m.anyRequest(new(WalletList), actionFetchUserWallets, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return trs, nil
+	return *(trs.(*WalletList)), nil
 }
 
 // Wallet finds all user's wallets. Provided for convenience.

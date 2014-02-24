@@ -127,11 +127,13 @@ func (t *WebPayIn) Save() error {
 		delete(data, field)
 	}
 
-	tr, err := t.service.webPayinRequest(actionCreateWebPayIn, data)
+	tr, err := t.service.anyRequest(new(WebPayIn), actionCreateWebPayIn, data)
 	if err != nil {
 		return err
 	}
-	*t = *tr
+	serv := t.service
+	*t = *(tr.(*WebPayIn))
+	t.service = serv
 
 	if t.Status == "FAILED" {
 		return &ErrPayInFailed{t.Id, t.ResultMessage}
@@ -235,12 +237,12 @@ func (p *DirectPayIn) Save() error {
 		delete(data, field)
 	}
 
-	tr, err := p.service.directPayinRequest(actionCreateDirectPayIn, data)
+	tr, err := p.service.anyRequest(new(DirectPayIn), actionCreateDirectPayIn, data)
 	if err != nil {
 		return err
 	}
 	serv := p.service
-	*p = *tr
+	*p = *(tr.(*DirectPayIn))
 	p.service = serv
 
 	if p.Status == "FAILED" {
@@ -251,33 +253,9 @@ func (p *DirectPayIn) Save() error {
 
 // PayIn finds a payment.
 func (m *MangoPay) PayIn(id string) (*WebPayIn, error) {
-	p, err := m.webPayinRequest(actionFetchPayIn, JsonObject{"Id": id})
+	p, err := m.anyRequest(new(WebPayIn), actionFetchPayIn, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return p, nil
-}
-
-func (m *MangoPay) webPayinRequest(action mangoAction, data JsonObject) (*WebPayIn, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(WebPayIn)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (m *MangoPay) directPayinRequest(action mangoAction, data JsonObject) (*DirectPayIn, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(DirectPayIn)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
+	return p.(*WebPayIn), nil
 }

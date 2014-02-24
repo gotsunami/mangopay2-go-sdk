@@ -66,11 +66,11 @@ func (c *Card) String() string {
 
 // Card fetches a registered credit card.
 func (m *MangoPay) Card(id string) (*Card, error) {
-	c, err := m.cardRequest(actionFetchCard, JsonObject{"Id": id})
+	any, err := m.anyRequest(new(Card), actionFetchCard, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return c, nil
+	return any.(*Card), nil
 }
 
 // Card finds all user's cards.
@@ -192,13 +192,13 @@ func (c *CardRegistration) Init() error {
 		delete(data, field)
 	}
 
-	cr, err := c.service.cardRegistartionRequest(actionCreateCardRegistration, data)
+	cr, err := c.service.anyRequest(new(CardRegistration), actionCreateCardRegistration, data)
 	if err != nil {
 		return err
 	}
 	// Backup private service
 	service := c.service
-	*c = *cr
+	*c = *(cr.(*CardRegistration))
 	c.service = service
 
 	// Okay for step 2.
@@ -217,41 +217,18 @@ func (c *CardRegistration) Register(registrationData string) error {
 	if !c.isInitialized {
 		return errors.New("card registration process not initialized. Did you call Init() first?")
 	}
-	cr, err := c.service.cardRegistartionRequest(actionSendCardRegistrationData,
-		JsonObject{"Id": c.Id, "RegistrationData": registrationData})
+	cr, err := c.service.anyRequest(new(CardRegistration),
+		actionSendCardRegistrationData, JsonObject{"Id": c.Id,
+			"RegistrationData": registrationData})
 	if err != nil {
 		return err
 	}
 	// Backup private members
 	serv := c.service
 	isr := c.isInitialized
-	*c = *cr
+	*c = *(cr.(*CardRegistration))
 	c.CardRegistrationData = registrationData
 	c.service = serv
 	c.isInitialized = isr
 	return nil
-}
-
-func (m *MangoPay) cardRegistartionRequest(action mangoAction, data JsonObject) (*CardRegistration, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(CardRegistration)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (m *MangoPay) cardRequest(action mangoAction, data JsonObject) (*Card, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	c := new(Card)
-	if err := m.unMarshalJSONResponse(resp, c); err != nil {
-		return nil, err
-	}
-	return c, nil
 }

@@ -350,7 +350,7 @@ Options:
 			perror(err.Error())
 		}
 		if len(ws) == 0 {
-			fmt.Println("No transfers.")
+			fmt.Println("No wallets.")
 		} else {
 			for _, tr := range ws {
 				fmt.Println(tr)

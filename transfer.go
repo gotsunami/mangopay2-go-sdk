@@ -106,11 +106,13 @@ func (t *Transfer) Save() error {
 		delete(data, field)
 	}
 
-	tr, err := t.service.transferRequest(actionCreateTransfer, data)
+	tr, err := t.service.anyRequest(new(Transfer), actionCreateTransfer, data)
 	if err != nil {
 		return err
 	}
-	*t = *tr
+	serv := t.service
+	*t = *(tr.(*Transfer))
+	t.service = serv
 
 	if t.Status == "FAILED" {
 		return &ErrTransferFailed{t.Id, t.ResultMessage}
@@ -120,41 +122,17 @@ func (t *Transfer) Save() error {
 
 // Transfer finds a transaction by id.
 func (m *MangoPay) Transfer(id string) (*Transfer, error) {
-	w, err := m.transferRequest(actionFetchTransfer, JsonObject{"Id": id})
+	w, err := m.anyRequest(new(Transfer), actionFetchTransfer, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return w, nil
+	return w.(*Transfer), nil
 }
 
 // Transfer finds all user's transactions. Provided for convenience.
 func (m *MangoPay) Transfers(user Consumer) (TransferList, error) {
 	trs, err := m.transfers(user)
 	return trs, err
-}
-
-func (m *MangoPay) transferRequest(action mangoAction, data JsonObject) (*Transfer, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(Transfer)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
-}
-
-func (m *MangoPay) transferListRequest(action mangoAction, data JsonObject) (TransferList, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	t := TransferList{}
-	if err := m.unMarshalJSONResponse(resp, &t); err != nil {
-		return nil, err
-	}
-	return t, nil
 }
 
 func (m *MangoPay) transfers(u Consumer) (TransferList, error) {
@@ -168,9 +146,9 @@ func (m *MangoPay) transfers(u Consumer) (TransferList, error) {
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	trs, err := m.transferListRequest(actionFetchUserTransfers, JsonObject{"Id": id})
+	trs, err := m.anyRequest(new(TransferList), actionFetchUserTransfers, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return trs, nil
+	return *(trs.(*TransferList)), nil
 }

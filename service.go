@@ -197,6 +197,25 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 	return nil
 }
 
+// Generic request for any object.
+func (m *MangoPay) anyRequest(o interface{}, action mangoAction, data JsonObject) (interface{}, error) {
+	resp, err := m.request(action, data)
+	if err != nil {
+		return nil, err
+	}
+
+	t := reflect.TypeOf(o)
+	if t.Kind() == reflect.Ptr {
+		v := reflect.ValueOf(o)
+		t = reflect.Indirect(v).Type()
+	}
+	ins := reflect.New(t).Interface()
+	if err := m.unMarshalJSONResponse(resp, ins); err != nil {
+		return nil, err
+	}
+	return ins, nil
+}
+
 func unixTimeToString(t int64) string {
 	if t > 0 {
 		return time.Unix(t, 0).String()

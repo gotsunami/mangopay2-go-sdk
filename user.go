@@ -45,21 +45,9 @@ func (m *MangoPay) Users() (UserList, error) {
 
 // User fetch a user (natural or legal) using the Id attribute.
 func (m *MangoPay) User(id string) (*User, error) {
-	u, err := m.userRequest(actionFetchUser, JsonObject{"Id": id})
+	u, err := m.anyRequest(new(User), actionFetchUser, JsonObject{"Id": id})
 	if err != nil {
 		return nil, err
 	}
-	return u, nil
-}
-
-func (m *MangoPay) userRequest(action mangoAction, data JsonObject) (*User, error) {
-	resp, err := m.request(action, data)
-	if err != nil {
-		return nil, err
-	}
-	u := new(User)
-	if err := m.unMarshalJSONResponse(resp, u); err != nil {
-		return nil, err
-	}
-	return u, nil
+	return u.(*User), nil
 }
