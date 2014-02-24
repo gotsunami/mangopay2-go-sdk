@@ -239,7 +239,8 @@ func struct2string(c interface{}) string {
 		if sfield.Anonymous {
 			b.Write([]byte(struct2string(e.Field(i).Addr().Interface())))
 		} else {
-			if name == "CreationDate" || name == "ExecutionDate" {
+			if name == "CreationDate" || name == "ExecutionDate" ||
+				name == "Birthday" {
 				val = unixTimeToString(val.(int64))
 			}
 			b.Write([]byte(fmt.Sprintf("%-24s: %v\n", name, val)))

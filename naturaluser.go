@@ -13,7 +13,7 @@ type NaturalUser struct {
 	User
 	FirstName, LastName string
 	Address             string
-	Birthday            int
+	Birthday            int64
 	Nationality         string
 	CountryOfResidence  string
 	Occupation          string
@@ -29,7 +29,7 @@ func (u *NaturalUser) String() string {
 }
 
 // NewNaturalUser creates a new natural user.
-func (m *MangoPay) NewNaturalUser(first, last string, email string, birthday int, nationality, country string) *NaturalUser {
+func (m *MangoPay) NewNaturalUser(first, last string, email string, birthday int64, nationality, country string) *NaturalUser {
 	u := &NaturalUser{
 		FirstName:          first,
 		LastName:           last,
