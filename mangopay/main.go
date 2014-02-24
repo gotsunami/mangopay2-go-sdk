@@ -133,6 +133,8 @@ where action is one of:
   card*             fetch a credit card
   cards*            list all user's cards
 
+  addrefund*        refund a payment (provide TransferId or PayInId)
+
 Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
@@ -535,6 +537,22 @@ Options:
 				fmt.Println(c)
 			}
 		}
+	case "addrefund":
+		r := &mango.Refund{}
+		if err := json.Unmarshal([]byte(*post), r); err != nil {
+			perror(err.Error())
+		}
+
+		t, err := service.Transfer(r.InitialTransactionId)
+		if err != nil {
+			perror(err.Error())
+		}
+		r, err = t.Refund()
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Transfer refund:")
+		fmt.Println(r)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

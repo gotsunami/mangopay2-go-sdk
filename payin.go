@@ -36,6 +36,7 @@ type PayIn struct {
 	Nature           string // REGULAR, REFUND or REPUDIATION
 	PaymentType      string
 	ExecutionType    string // WEB or DIRECT (with tokenized card)
+	service          *MangoPay
 }
 
 // DirectPayIn is used to process a payment with registered (tokenized) cards.
@@ -96,12 +97,13 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 			DebitedFunds:     amount,
 			Fees:             fees,
 			CreditedWalletId: credit.Id,
+			service:          m,
 		},
 		ReturnUrl: u.String(),
 		CardType:  "CB_VISA_MASTERCARD",
 		Culture:   culture,
+		service:   m,
 	}
-	p.service = m
 	return p, nil
 }
 
@@ -249,6 +251,17 @@ func (p *DirectPayIn) Save() error {
 		return &ErrPayInFailed{p.Id, p.ResultMessage}
 	}
 	return nil
+}
+
+// Refund allows to refund a pay-in. Call the Refund's Save() method
+// to make a request to reimburse a user on his payment card.
+func (p *PayIn) Refund() *Refund {
+	return &Refund{
+		ProcessReply: ProcessReply{},
+		service:      p.service, // FIXME p.service,
+		payInId:      p.Id,
+		kind:         payInRefund,
+	}
 }
 
 // PayIn finds a payment.

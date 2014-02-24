@@ -83,6 +83,16 @@ func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, 
 	return t, nil
 }
 
+func (t *Transfer) Refund() (*Refund, error) {
+	r := &Refund{
+		ProcessReply: ProcessReply{},
+		service:      t.service,
+		transferId:   t.Id,
+		kind:         transferRefund,
+	}
+	return r, r.save()
+}
+
 // Save sends an HTTP query to create a transfer. Upon successful creation,
 // it may return an ErrTransferFailed error if the transaction has been
 // rejected (unsufficient wallet balance for example).
