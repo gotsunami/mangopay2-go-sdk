@@ -40,10 +40,9 @@ type Refund struct {
 	DebitedWalletId        string
 	CreditedWalletId       string
 
-	service    *MangoPay
-	transferId string
-	payInId    string
-	kind       refundKind
+	transfer *Transfer
+	payIn    *PayIn
+	kind     refundKind
 }
 
 func (r *Refund) String() string {
@@ -67,26 +66,27 @@ func (r *Refund) save() error {
 	}
 
 	// Fields not allowed when creating a tranfer.
-	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status", "Fees", "InitialTransactionType", "InitialTransactionId", "DebitedFunds", "Nature", "DebitedWalletId", "CreditedWalletId"} {
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status", "Fees", "InitialTransactionType", "InitialTransactionId", "DebitedFunds", "Nature", "DebitedWalletId", "CreditedWalletId", "Type"} {
 		delete(data, field)
 	}
 
+	data["AuthorId"] = r.transfer.AuthorId
 	var action mangoAction
+	r.String()
 	switch r.kind {
 	case transferRefund:
 		action = actionCreateTransferRefund
-		data["TransferId"] = r.transferId
+		data["TransferId"] = r.transfer.Id
 	case payInRefund:
 		action = actionCreatePayInRefund
-		data["PayInId"] = r.payInId
+		data["PayInId"] = r.payIn.Id
 	}
-	ins, err := r.service.anyRequest(new(Refund), action, data)
-	fmt.Println("DATA", data)
+	ins, err := r.transfer.service.anyRequest(new(Refund), action, data)
 	if err != nil {
 		return err
 	}
-	s, t, p, k := r.service, r.transferId, r.payInId, r.kind
+	t, p, k := r.transfer, r.payIn, r.kind
 	*r = *(ins.(*Refund))
-	r.service, r.transferId, r.payInId, r.kind = s, t, p, k
+	r.transfer, r.payIn, r.kind = t, p, k
 	return nil
 }

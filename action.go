@@ -176,7 +176,7 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	},
 	actionCreateTransferRefund: mangoRequest{
 		"POST",
-		"/transfers/{{TransferId}}/refund",
+		"/transfers/{{TransferId}}/refunds",
 		JsonObject{"TransferId": ""},
 	},
 	actionCreatePayInRefund: mangoRequest{

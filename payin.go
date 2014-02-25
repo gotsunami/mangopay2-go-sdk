@@ -258,8 +258,7 @@ func (p *DirectPayIn) Save() error {
 func (p *PayIn) Refund() *Refund {
 	return &Refund{
 		ProcessReply: ProcessReply{},
-		service:      p.service, // FIXME p.service,
-		payInId:      p.Id,
+		payIn:        p,
 		kind:         payInRefund,
 	}
 }

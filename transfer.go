@@ -86,8 +86,7 @@ func (m *MangoPay) NewTransfer(author Consumer, amount Money, fees Money, from, 
 func (t *Transfer) Refund() (*Refund, error) {
 	r := &Refund{
 		ProcessReply: ProcessReply{},
-		service:      t.service,
-		transferId:   t.Id,
+		transfer:     t,
 		kind:         transferRefund,
 	}
 	return r, r.save()

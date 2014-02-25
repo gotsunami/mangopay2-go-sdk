@@ -140,7 +140,7 @@ func TestDirectPayin(t *testing.T) {
 	for k, u := range users {
 		log.Printf("Sending %d EUR to %s's wallet ... ", amount, u.FirstName)
 		p, err := service.NewDirectPayIn(u, u, usersinfo[k].card,
-			usersinfo[k].wallet, mango.Money{"EUR", amount * 100}, noFees,
+			usersinfo[k].wallet, mango.Money{currency, amount * 100}, noFees,
 			"http://myreturnurl")
 		if err != nil {
 			t.Fatal(err.Error)
@@ -148,5 +148,50 @@ func TestDirectPayin(t *testing.T) {
 		if err := p.Save(); err != nil {
 			t.Fatal(err.Error())
 		}
+	}
+	for k, _ := range users {
+		w, err := service.Wallet(usersinfo[k].wallet.Id)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		if w.Balance.Amount != amount*100 {
+			t.Errorf("expect 100 EUR in wallet, got %d", w.Balance.Amount/100)
+		}
+	}
+}
+
+func TestTransferBetweenWallets(t *testing.T) {
+	amount := 30
+	fees := 2
+	log.Printf("Alice pays %d EUR to Bob (%d fees) ...", amount, fees)
+	tr, err := service.NewTransfer(users[0], mango.Money{currency, amount * 100},
+		mango.Money{currency, int(fees * 100)},
+		usersinfo[0].wallet, usersinfo[1].wallet)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := tr.Save(); err != nil {
+		t.Fatal(err.Error())
+	}
+	log.Printf("Checking Bob's wallet balance ...")
+	w, err := service.Wallet(usersinfo[1].wallet.Id)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if w.Balance.Amount != (10000 + 2800) {
+		t.Errorf("wrong Bob's wallet balance. Expect %.2f, got %.2f", 128, w.Balance.Amount)
+	}
+
+	log.Printf("Try refunding Alice ...")
+	if _, err := tr.Refund(); err != nil {
+		t.Fatal(err.Error())
+	}
+	log.Printf("Checking Alice's wallet balance ...")
+	w, err = service.Wallet(usersinfo[0].wallet.Id)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if w.Balance.Amount != 10000 {
+		t.Errorf("wrong Alice's wallet balance. Expect 100 EUR, got %.2f", w.Balance.Amount)
 	}
 }
