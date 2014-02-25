@@ -87,3 +87,12 @@ func (r *Refund) save() error {
 	r.transfer, r.payIn, r.kind = t, p, k
 	return nil
 }
+
+// Refund fetches a refund (tranfer or payin).
+func (m *MangoPay) Refund(id string) (*Refund, error) {
+	any, err := m.anyRequest(new(Refund), actionFetchRefund, JsonObject{"Id": id})
+	if err != nil {
+		return nil, err
+	}
+	return any.(*Refund), nil
+}

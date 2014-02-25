@@ -134,6 +134,7 @@ where action is one of:
   cards*            list all user's cards
 
   addrefund*        refund a payment (provide TransferId or PayInId)
+  refund*           fetch a refund (transfer or payin)
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -552,6 +553,18 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println("Transfer refund:")
+		fmt.Println(r)
+	case "refund":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		r, err := service.Refund(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
 		fmt.Println(r)
 	default:
 		flag.Usage()
