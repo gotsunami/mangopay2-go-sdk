@@ -26,6 +26,8 @@ var (
 	users          []*mango.NaturalUser
 	usersinfo      []user
 	noFees         = mango.Money{currency, 0}
+	transfer       *mango.Transfer
+	payin          *mango.PayIn
 )
 
 type user struct {
@@ -148,6 +150,10 @@ func TestDirectPayin(t *testing.T) {
 		if err := p.Save(); err != nil {
 			t.Fatal(err.Error())
 		}
+		// Save Bob's direct paying for later refund
+		if k == 1 {
+			payin = &p.PayIn
+		}
 	}
 	for k, _ := range users {
 		w, err := service.Wallet(usersinfo[k].wallet.Id)
@@ -173,6 +179,8 @@ func TestTransferBetweenWallets(t *testing.T) {
 	if err := tr.Save(); err != nil {
 		t.Fatal(err.Error())
 	}
+	// Hold current successful transfer for later refund
+	transfer = tr
 	log.Printf("Checking Bob's wallet balance ...")
 	w, err := service.Wallet(usersinfo[1].wallet.Id)
 	if err != nil {
@@ -181,17 +189,35 @@ func TestTransferBetweenWallets(t *testing.T) {
 	if w.Balance.Amount != (10000 + 2800) {
 		t.Errorf("wrong Bob's wallet balance. Expect %.2f, got %.2f", 128, w.Balance.Amount)
 	}
+}
 
+func TestTransferRefund(t *testing.T) {
 	log.Printf("Try refunding Alice ...")
-	if _, err := tr.Refund(); err != nil {
+	if _, err := transfer.Refund(); err != nil {
 		t.Fatal(err.Error())
 	}
 	log.Printf("Checking Alice's wallet balance ...")
-	w, err = service.Wallet(usersinfo[0].wallet.Id)
+	w, err := service.Wallet(usersinfo[0].wallet.Id)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 	if w.Balance.Amount != 10000 {
 		t.Errorf("wrong Alice's wallet balance. Expect 100 EUR, got %.2f", w.Balance.Amount)
+	}
+}
+
+func TestPayInRefund(t *testing.T) {
+	log.Printf("Try refunding Bob after direct payin ...")
+	_, err := payin.Refund()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	log.Printf("Checking Bob's wallet balance ...")
+	w, err := service.Wallet(usersinfo[1].wallet.Id)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if w.Balance.Amount != 0 {
+		t.Errorf("wrong Bob's wallet balance. Expect 0 EUR, got %.2f", w.Balance.Amount)
 	}
 }

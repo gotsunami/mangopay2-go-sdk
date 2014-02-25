@@ -39,6 +39,10 @@ type PayIn struct {
 	service          *MangoPay
 }
 
+func (p *PayIn) String() string {
+	return struct2string(p)
+}
+
 // DirectPayIn is used to process a payment with registered (tokenized) cards.
 type DirectPayIn struct {
 	PayIn
@@ -136,6 +140,7 @@ func (t *WebPayIn) Save() error {
 	serv := t.service
 	*t = *(tr.(*WebPayIn))
 	t.service = serv
+	t.PayIn.service = serv
 
 	if t.Status == "FAILED" {
 		return &ErrPayInFailed{t.Id, t.ResultMessage}
@@ -209,6 +214,7 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 			DebitedFunds:     amount,
 			Fees:             fees,
 			CreditedWalletId: dst.Id,
+			service:          m,
 		},
 		SecureModeReturnUrl: u.String(),
 		CardId:              src.Id,
@@ -246,6 +252,7 @@ func (p *DirectPayIn) Save() error {
 	serv := p.service
 	*p = *(tr.(*DirectPayIn))
 	p.service = serv
+	p.PayIn.service = serv
 
 	if p.Status == "FAILED" {
 		return &ErrPayInFailed{p.Id, p.ResultMessage}

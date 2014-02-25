@@ -67,18 +67,22 @@ func (r *Refund) save() error {
 		delete(data, field)
 	}
 
-	data["AuthorId"] = r.transfer.AuthorId
 	var action mangoAction
+	var service *MangoPay
 	r.String()
 	switch r.kind {
 	case transferRefund:
 		action = actionCreateTransferRefund
+		data["AuthorId"] = r.transfer.AuthorId
 		data["TransferId"] = r.transfer.Id
+		service = r.transfer.service
 	case payInRefund:
 		action = actionCreatePayInRefund
+		data["AuthorId"] = r.payIn.AuthorId
 		data["PayInId"] = r.payIn.Id
+		service = r.payIn.service
 	}
-	ins, err := r.transfer.service.anyRequest(new(Refund), action, data)
+	ins, err := service.anyRequest(new(Refund), action, data)
 	if err != nil {
 		return err
 	}
