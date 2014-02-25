@@ -89,7 +89,10 @@ func (t *Transfer) Refund() (*Refund, error) {
 		transfer:     t,
 		kind:         transferRefund,
 	}
-	return r, r.save()
+	if err := r.save(); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 // Save sends an HTTP query to create a transfer. Upon successful creation,

@@ -255,12 +255,16 @@ func (p *DirectPayIn) Save() error {
 
 // Refund allows to refund a pay-in. Call the Refund's Save() method
 // to make a request to reimburse a user on his payment card.
-func (p *PayIn) Refund() *Refund {
-	return &Refund{
+func (p *PayIn) Refund() (*Refund, error) {
+	r := &Refund{
 		ProcessReply: ProcessReply{},
 		payIn:        p,
 		kind:         payInRefund,
 	}
+	if err := r.save(); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 // PayIn finds a payment.
