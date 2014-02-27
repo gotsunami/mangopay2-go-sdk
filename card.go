@@ -75,13 +75,7 @@ func (m *MangoPay) Card(id string) (*Card, error) {
 
 // Card finds all user's cards.
 func (m *MangoPay) Cards(user Consumer) (CardList, error) {
-	id := ""
-	switch user.(type) {
-	case *LegalUser:
-		id = user.(*LegalUser).Id
-	case *NaturalUser:
-		id = user.(*NaturalUser).Id
-	}
+	id := consumerId(user)
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
@@ -132,13 +126,7 @@ func (m *MangoPay) Cards(user Consumer) (CardList, error) {
 //      log.Fatal(err)
 //  }}
 func (m *MangoPay) NewCardRegistration(user Consumer, currency string) (*CardRegistration, error) {
-	id := ""
-	switch user.(type) {
-	case *LegalUser:
-		id = user.(*LegalUser).Id
-	case *NaturalUser:
-		id = user.(*NaturalUser).Id
-	}
+	id := consumerId(user)
 	if id == "" {
 		return nil, errors.New("empty user ID. Unable to create card registration.")
 	}

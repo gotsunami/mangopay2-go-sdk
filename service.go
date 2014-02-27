@@ -248,3 +248,14 @@ func struct2string(c interface{}) string {
 	}
 	return b.String()
 }
+
+func consumerId(c Consumer) string {
+	id := ""
+	switch c.(type) {
+	case *LegalUser:
+		id = c.(*LegalUser).Id
+	case *NaturalUser:
+		id = c.(*NaturalUser).Id
+	}
+	return id
+}
