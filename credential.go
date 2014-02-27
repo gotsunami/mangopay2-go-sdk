@@ -5,7 +5,12 @@
 package mango
 
 import (
-	_ "errors"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 // AuthMode defines authentication methods for communicating with
@@ -26,6 +31,7 @@ type Config struct {
 	Email      string
 	Passphrase string
 	Env        string
+	env        ExecEnvironment
 }
 
 func (c *Config) String() string {
@@ -33,6 +39,36 @@ func (c *Config) String() string {
 }
 
 // RegisterClient asks MangoPay to create a new client account.
-func RegisterClient(clientId, name, email string) (*Config, error) {
-	return nil, nil
+func RegisterClient(clientId, name, email string, env ExecEnvironment) (*Config, error) {
+	c := &Config{ClientId: clientId, Name: name, Email: email}
+	body, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+	u, err := url.Parse(fmt.Sprintf("%sclients/", rootURLs[env]))
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", u.String(), strings.NewReader(string(body)))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	b, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(b, c); err != nil {
+		return nil, err
+	}
+	c.env = env
+	if env == Sandbox {
+		c.Env = "sandbox"
+	} else {
+		c.Env = "production"
+	}
+	return c, nil
 }

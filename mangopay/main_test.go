@@ -8,16 +8,18 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/matm/mangopay2-go-sdk"
 	"log"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 )
 
 const (
-	clientId   = "mypartnerid"
-	passphrase = "582XzQJJzbrC4SeoA3xvMomtApg2HFQenztM12eEjqPrAgjgk4"
-	env        = mango.Sandbox
+	env      = "sandbox"
+	testconf = "testing.conf" // Credentials used for testing
 )
 
 var (
@@ -53,8 +55,33 @@ const (
 )
 
 func init() {
+	var f *os.File
 	var err error
-	service, err = mango.NewMangoPay(clientId, passphrase, env)
+	var c *mango.Config
+
+	f, err = os.Open(testconf)
+	if err != nil {
+		if os.IsNotExist(err) {
+			f, err = os.Create(testconf)
+			ti := strconv.FormatInt(time.Now().Unix(), 10)
+			c, err = mango.RegisterClient("testclient"+ti, "A name",
+				"m"+ti+"@gmail.com", mango.Sandbox)
+			m, _ := json.Marshal(c)
+			f.Write(m)
+			f.Close()
+		} else {
+			panic(err)
+		}
+	} else {
+		c, err = parseConfig(testconf)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	log.Printf("Running tests in sandbox as user %s", c.ClientId)
+
+	service, err = mango.NewMangoPay(c, mango.BasicAuth)
 	if err != nil {
 		log.Fatalf("can't use service: %s\n", err.Error())
 	}
@@ -229,7 +256,6 @@ func TestCreateBankAccounts(t *testing.T) {
 		{"FR3020041010124530725S03383", "CRLYFRPP"},
 		{"FR3020041010124530725S03383", "CRLYFRPP"},
 	}
-	service.Option(mango.Verbosity(mango.Debug))
 	for k, u := range users {
 		log.Printf("Creating IBAN account for %s ...", u.FirstName)
 		acc, err := service.NewBankAccount(u, u.FirstName, "one great place", mango.IBAN)

@@ -72,19 +72,18 @@ func NewMangoPay(auth *Config, mode AuthMode) (*MangoPay, error) {
 	if auth == nil {
 		return nil, errors.New("nil config")
 	}
-	var env ExecEnvironment
 	if auth.Env == "sandbox" {
-		env = Sandbox
+		auth.env = Sandbox
 	} else if auth.Env == "production" {
-		env = Production
+		auth.env = Production
 	} else {
 		return nil, errors.New("unknown exec environment: " + auth.Env)
 	}
-	u, err := url.Parse(rootURLs[env])
+	u, err := url.Parse(rootURLs[auth.env])
 	if err != nil {
 		return nil, err
 	}
-	return &MangoPay{auth.ClientId, auth.Passphrase, env, u, Info, mode}, nil
+	return &MangoPay{auth.ClientId, auth.Passphrase, auth.env, u, Info, mode}, nil
 }
 
 // Option set various options like verbosity etc.
