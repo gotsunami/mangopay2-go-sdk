@@ -140,6 +140,9 @@ where action is one of:
   account*          fetch a user's bank account
   accounts*         list all user's bank accounts
 
+  addpayout*        create a bank wire
+  payout*           fetch a bank wire
+
 Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
@@ -623,6 +626,37 @@ Options:
 				fmt.Println(acc)
 			}
 		}
+	case "addpayout":
+		r := &mango.PayOut{}
+		if err := json.Unmarshal([]byte(*post), r); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: r.AuthorId}}
+		wallet := mango.Wallet{ProcessIdent: mango.ProcessIdent{Id: r.DebitedWalletId}}
+		acc := mango.BankAccount{ProcessIdent: mango.ProcessIdent{Id: r.BankAccountId}}
+		pay, err := service.NewPayOut(u, r.DebitedFunds, r.Fees, &wallet, &acc)
+		if err != nil {
+			perror(err.Error())
+		}
+		if err := pay.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Bank wire:")
+		fmt.Println(pay)
+	case "payout":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		p, err := service.PayOut(data.Id)
+		if err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Bank wire:")
+		fmt.Println(p)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

@@ -47,6 +47,9 @@ const (
 
 	actionCreateBankAccount
 	actionFetchBankAccount
+
+	actionCreatePayOut
+	actionFetchPayOut
 )
 
 // JsonObject is used to manage JSON data.
@@ -207,6 +210,16 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionFetchUserBankAccounts: mangoRequest{
 		"GET",
 		"/users/{{Id}}/bankaccounts",
+		JsonObject{"Id": ""},
+	},
+	actionCreatePayOut: mangoRequest{
+		"POST",
+		"/payouts/bankwire",
+		nil,
+	},
+	actionFetchPayOut: mangoRequest{
+		"GET",
+		"/payouts/{{Id}}",
 		JsonObject{"Id": ""},
 	},
 }
