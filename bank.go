@@ -156,3 +156,23 @@ func (b *BankAccount) Save() error {
 
 	return nil
 }
+
+// BankAccount returns a user's bank account.
+func (m *MangoPay) BankAccount(user Consumer, id string) (*BankAccount, error) {
+	userId := ""
+	switch user.(type) {
+	case *LegalUser:
+		userId = user.(*LegalUser).Id
+	case *NaturalUser:
+		userId = user.(*NaturalUser).Id
+	}
+	if userId == "" {
+		return nil, errors.New("user has empty Id")
+	}
+	w, err := m.anyRequest(new(BankAccount), actionFetchBankAccount,
+		JsonObject{"Id": id, "UserId": userId})
+	if err != nil {
+		return nil, err
+	}
+	return w.(*BankAccount), nil
+}
