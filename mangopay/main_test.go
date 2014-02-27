@@ -169,7 +169,7 @@ func TestDirectPayin(t *testing.T) {
 func TestTransferBetweenWallets(t *testing.T) {
 	amount := 30
 	fees := 2
-	log.Printf("Alice pays %d EUR to Bob (%d fees) ...", amount, fees)
+	log.Printf("Alice pays %d EUR to Bob (%d EUR fees) ...", amount, fees)
 	tr, err := service.NewTransfer(users[0], mango.Money{currency, amount * 100},
 		mango.Money{currency, int(fees * 100)},
 		usersinfo[0].wallet, usersinfo[1].wallet)
@@ -219,5 +219,26 @@ func TestPayInRefund(t *testing.T) {
 	}
 	if w.Balance.Amount != 0 {
 		t.Errorf("wrong Bob's wallet balance. Expect 0 EUR, got %.2f", w.Balance.Amount)
+	}
+}
+
+func TestCreateBankAccounts(t *testing.T) {
+	banks := []struct{ IBAN, BIC string }{
+		// Using different IBAN/BIC numbers seems not to be supported by the
+		// testing API.
+		{"FR3020041010124530725S03383", "CRLYFRPP"},
+		{"FR3020041010124530725S03383", "CRLYFRPP"},
+	}
+	service.Option(mango.Verbosity(mango.Debug))
+	for k, u := range users {
+		log.Printf("Creating IBAN account for %s ...", u.FirstName)
+		acc, err := service.NewBankAccount(u, u.FirstName, "one great place", mango.IBAN)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		acc.IBAN, acc.BIC = banks[k].IBAN, banks[k].BIC
+		if err := acc.Save(); err != nil {
+			t.Fatal(err.Error())
+		}
 	}
 }
