@@ -176,3 +176,22 @@ func (m *MangoPay) BankAccount(user Consumer, id string) (*BankAccount, error) {
 	}
 	return w.(*BankAccount), nil
 }
+
+// BankAccounts finds all user's bank accounts.
+func (m *MangoPay) BankAccounts(user Consumer) (BankAccountList, error) {
+	userId := ""
+	switch user.(type) {
+	case *LegalUser:
+		userId = user.(*LegalUser).Id
+	case *NaturalUser:
+		userId = user.(*NaturalUser).Id
+	}
+	if userId == "" {
+		return nil, errors.New("user has empty Id")
+	}
+	accs, err := m.anyRequest(new(BankAccountList), actionFetchUserBankAccounts, JsonObject{"Id": userId})
+	if err != nil {
+		return nil, err
+	}
+	return *(accs.(*BankAccountList)), nil
+}

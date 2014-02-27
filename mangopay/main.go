@@ -138,6 +138,7 @@ where action is one of:
 
   addaccount*       create an IBAN bank account
   account*          fetch a user's bank account
+  accounts*         list all user's bank accounts
 
 Actions with an asterisk(*) require input JSON data (-d).
 
@@ -602,6 +603,26 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(a)
+	case "accounts":
+		var data struct {
+			Id string
+		}
+		if err := json.Unmarshal([]byte(*post), &data); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		accs, err := service.BankAccounts(u)
+		if err != nil {
+			perror(err.Error())
+		}
+		if len(accs) == 0 {
+			fmt.Println("No bank account.")
+		} else {
+			for _, acc := range accs {
+				fmt.Println(acc)
+			}
+		}
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))
