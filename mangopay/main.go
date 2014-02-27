@@ -136,6 +136,8 @@ where action is one of:
   addrefund*        refund a payment (provide TransferId or PayInId)
   refund*           fetch a refund (transfer or payin)
 
+  addaccount*       create an IBAN bank account
+
 Actions with an asterisk(*) require input JSON data (-d).
 
 Options:
@@ -566,6 +568,24 @@ Options:
 			perror(err.Error())
 		}
 		fmt.Println(r)
+	case "addaccount":
+		r := &mango.BankAccount{}
+		if err := json.Unmarshal([]byte(*post), r); err != nil {
+			perror(err.Error())
+		}
+		u := new(mango.LegalUser)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: r.UserId}}
+		acc, err := service.NewBankAccount(u, r.OwnerName, r.OwnerAddress, mango.IBAN)
+		if err != nil {
+			perror(err.Error())
+		}
+		acc.IBAN = r.IBAN
+		acc.BIC = r.BIC
+		if err := acc.Save(); err != nil {
+			perror(err.Error())
+		}
+		fmt.Println("Bank account:")
+		fmt.Println(acc)
 	default:
 		flag.Usage()
 		perror(fmt.Sprintf("No such action '%s'.", action))

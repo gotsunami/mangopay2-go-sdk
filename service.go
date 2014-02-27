@@ -88,14 +88,14 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 	}
 
 	// Create the submit url
-	path := ""
+	path := mr.Path
 	if mr.PathValues != nil {
 		// Substitute path variables, if any
 		for name, _ := range mr.PathValues {
 			if _, ok := data[name]; !ok {
 				return nil, errors.New(fmt.Sprintf("missing keyword %s", name))
 			}
-			path = strings.Replace(mr.Path, "{{"+name+"}}", fmt.Sprintf("%v", data[name]), -1)
+			path = strings.Replace(path, "{{"+name+"}}", fmt.Sprintf("%v", data[name]), -1)
 		}
 	} else {
 		path = mr.Path

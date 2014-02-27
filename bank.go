@@ -44,13 +44,13 @@ type BankAccount struct {
 	OwnerAddress string
 	UserId       string
 	// Required for IBAN type
-	Iban          string
-	Bic           string // For IBAN, OTHER
+	IBAN          string
+	BIC           string // For IBAN, OTHER
 	AccountNumber string // For GB, US, CA, OTHER
 	// Required for GB type
 	SortCode string
 	// Required for US type
-	Aba string
+	ABA string
 	// Required for CA type
 	BankName          string
 	InstitutionNumber string
@@ -59,9 +59,10 @@ type BankAccount struct {
 	Country string
 
 	service *MangoPay
+	atype   AccountType
 }
 
-type IbanBankAccount struct {
+type IBANBankAccount struct {
 }
 
 func (b *BankAccount) String() string {
@@ -91,6 +92,7 @@ func (m *MangoPay) NewBankAccount(user Consumer, ownerName, ownerAddress string,
 		OwnerAddress: ownerAddress,
 		UserId:       id,
 		service:      m,
+		atype:        t,
 	}
 	return b, nil
 }
@@ -105,13 +107,42 @@ func (b *BankAccount) Save() error {
 		return err
 	}
 
-	// Force float64 to int conversion after unmarshalling.
-	for _, field := range []string{"CreationDate"} {
-		data[field] = int(data[field].(float64))
+	// Data fields to remove before sending the HTTP request.
+	ignore := []string{"Id", "CreationDate"}
+	switch b.atype {
+	case IBAN:
+		if b.IBAN == "" || b.BIC == "" {
+			return errors.New("missing full IBAN information")
+		}
+		ignore = append(ignore, "AccountNumber", "SortCode", "ABA", "BankName",
+			"InstitutionNumber", "BranchCode", "Country")
+	case GB:
+		if b.AccountNumber == "" || b.SortCode == "" {
+			return errors.New("missing full GB information")
+		}
+		ignore = append(ignore, "IBAN", "BIC", "ABA", "BankName",
+			"InstitutionNumber", "BranchCode", "Country")
+	case US:
+		if b.AccountNumber == "" || b.ABA == "" {
+			return errors.New("missing full US information")
+		}
+		ignore = append(ignore, "IBAN", "BIC", "SortCode", "BankName",
+			"InstitutionNumber", "BranchCode", "Country")
+	case CA:
+		if b.BankName == "" || b.InstitutionNumber == "" || b.BranchCode == "" ||
+			b.AccountNumber == "" {
+			return errors.New("missing full CA information")
+		}
+		ignore = append(ignore, "IBAN", "BIC", "SortCode", "ABA", "Country")
+	case OTHER:
+		if b.AccountNumber == "" || b.BIC == "" {
+			return errors.New("missing full OTHER information")
+		}
+		ignore = append(ignore, "IBAN", "ABA", "SortCode", "BankName",
+			"InstitutionNumber", "BranchCode")
 	}
 
-	// Fields not allowed when creating a tranfer.
-	for _, field := range []string{"Id", "CreationDate", "UserId"} {
+	for _, field := range ignore {
 		delete(data, field)
 	}
 
