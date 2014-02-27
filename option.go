@@ -15,17 +15,6 @@ const (
 	Debug
 )
 
-// AuthMode defines authentication methods for communicating with
-// the service.
-type AuthMode int
-
-const (
-	// Basic Access Authentication
-	BasicAuth AuthMode = iota
-	// OAuth 2.0, token based authentication
-	OAuth
-)
-
 // Sets verbosity level. Default verbosity level is Info.
 func Verbosity(v Level) option {
 	return func(m *MangoPay) {

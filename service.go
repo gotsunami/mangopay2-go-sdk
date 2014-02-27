@@ -4,7 +4,11 @@
 
 // Package mango is a library for the MangoPay service v2.
 //
-// http://www.mangopay.com
+// MangoPay is a platform that allows to accept payments and manage e-money
+// using wallets. See http://www.mangopay.com.
+//
+// First, create an account to authenticate to the service:
+//  doo
 package mango
 
 import (
@@ -62,14 +66,25 @@ type ProcessReply struct {
 }
 
 // NewMangoPay creates a suitable environment for accessing
-// the web service. Default verbosity level is set to Info, default authentication
-// mode to BasicAuth. They can be changed through the use of Option().
-func NewMangoPay(clientId, password string, env ExecEnvironment) (*MangoPay, error) {
+// the web service. Default verbosity level is set to Info, which can be
+// changed through the use of Option().
+func NewMangoPay(auth *Config, mode AuthMode) (*MangoPay, error) {
+	if auth == nil {
+		return nil, errors.New("nil config")
+	}
+	var env ExecEnvironment
+	if auth.Env == "sandbox" {
+		env = Sandbox
+	} else if auth.Env == "production" {
+		env = Production
+	} else {
+		return nil, errors.New("unknown exec environment: " + auth.Env)
+	}
 	u, err := url.Parse(rootURLs[env])
 	if err != nil {
 		return nil, err
 	}
-	return &MangoPay{clientId, password, env, u, Info, BasicAuth}, nil
+	return &MangoPay{auth.ClientId, auth.Passphrase, env, u, Info, mode}, nil
 }
 
 // Option set various options like verbosity etc.
@@ -127,11 +142,15 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 
 	// Set header for basic auth
 	if useAuth {
-		// TODO: only basic access auth supported at the moment. Add support
-		// for OAuth2.0.
-		credential := s.clientId + ":" + s.password
-		credential = base64.StdEncoding.EncodeToString([]byte(credential))
-		req.Header.Set("Authorization", "Basic "+credential)
+		if s.authMethod == BasicAuth {
+			credential := s.clientId + ":" + s.password
+			credential = base64.StdEncoding.EncodeToString([]byte(credential))
+			req.Header.Set("Authorization", "Basic "+credential)
+		} else {
+			// TODO: only basic access auth supported at the moment. Add support
+			// for OAuth2.0.
+			return nil, errors.New("OAuth2.0 access mode not supported.")
+		}
 	}
 	req.Header.Set("Content-Type", contentType)
 

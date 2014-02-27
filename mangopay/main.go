@@ -20,20 +20,6 @@ import (
 	"strings"
 )
 
-// JSON config read from config file
-type config struct {
-	ClientId   string
-	Name       string
-	Email      string
-	Passphrase string
-	EnvStr     string `json:"Env"`
-	env        mango.ExecEnvironment
-}
-
-func (c *config) String() string {
-	return fmt.Sprintf("Name: %s\nClientId: %s\nEmail: %s", c.Name, c.ClientId, c.Email)
-}
-
 func perror(msg string) {
 	fmt.Fprintf(os.Stderr, "error: %s\n", msg)
 	os.Exit(1)
@@ -76,23 +62,18 @@ func sendRegistrationData(c *mango.CardRegistration, cardNumber,
 }
 
 // Parse config file
-func parseConfig(configfile string) (*config, error) {
+func parseConfig(configfile string) (*mango.Config, error) {
 	data, err := ioutil.ReadFile(configfile)
 	if err != nil {
 		return nil, err
 	}
-	conf := new(config)
+	conf := new(mango.Config)
 	if err := json.Unmarshal(data, conf); err != nil {
 		return nil, err
 	}
-	if conf.EnvStr == "production" {
-		conf.env = mango.Production
-	} else {
-		if conf.EnvStr != "sandbox" {
-			return nil, errors.New(fmt.Sprintf("unknown exec environment '%s'. "+
-				"Must be one of production or sandbox.", conf.EnvStr))
-		}
-		conf.env = mango.Sandbox
+	if conf.Env != "production" && conf.Env != "sandbox" {
+		return nil, errors.New(fmt.Sprintf("unknown exec environment '%s'. "+
+			"Must be one of production or sandbox.", conf.Env))
 	}
 	return conf, nil
 }
@@ -165,7 +146,7 @@ Options:
 		perror(fmt.Sprintf("config parsing error: %s\n", err.Error()))
 	}
 
-	service, err := mango.NewMangoPay(conf.ClientId, conf.Passphrase, conf.env)
+	service, err := mango.NewMangoPay(conf, mango.BasicAuth)
 	if err != nil {
 		perror(fmt.Sprintf("can't use service: %s\n", err.Error()))
 	}

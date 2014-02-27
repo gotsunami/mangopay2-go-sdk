@@ -22,6 +22,8 @@ func (e *ErrPayOutFailed) Error() string {
 
 // A PayOut Bank wire is a request to withdraw money from a wallet to a
 // registered bank account.
+//
+// See http://docs.mangopay.com/api-references/pay-out-bank-wire/
 type PayOut struct {
 	ProcessReply
 	AuthorId          string

@@ -37,6 +37,8 @@ type BankAccountList []*BankAccount
 //
 // This way, only one structure is used to unmarshal any JSON response related
 // to bank accounts.
+//
+// See http://docs.mangopay.com/api-references/bank-accounts/
 type BankAccount struct {
 	ProcessIdent
 	Type         string // IBAN, GB, US, CA or OTHER
@@ -91,6 +93,7 @@ func (m *MangoPay) NewBankAccount(user Consumer, ownerName, ownerAddress string,
 	return b, nil
 }
 
+// Save sends the HTTP query to create the bank account.
 func (b *BankAccount) Save() error {
 	data := JsonObject{}
 	j, err := json.Marshal(b)
