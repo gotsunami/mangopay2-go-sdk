@@ -114,6 +114,17 @@ func (c *Config) String() string {
 	return struct2string(c)
 }
 
+// NewConfig creates a config suitable for NewMangoPay().
+func NewConfig(clientId, name, email, passwd, env string) *Config {
+	c := &Config{ClientId: clientId, Name: name, Email: email, Passphrase: passwd, Env: env}
+	if env == "sandbox" {
+		c.env = Sandbox
+	} else {
+		c.env = Production
+	}
+	return c
+}
+
 // RegisterClient asks MangoPay to create a new client account.
 func RegisterClient(clientId, name, email string, env ExecEnvironment) (*Config, error) {
 	c := &Config{ClientId: clientId, Name: name, Email: email}
@@ -140,11 +151,11 @@ func RegisterClient(clientId, name, email string, env ExecEnvironment) (*Config,
 	if err := json.Unmarshal(b, c); err != nil {
 		return nil, err
 	}
-	c.env = env
 	if env == Sandbox {
 		c.Env = "sandbox"
 	} else {
 		c.Env = "production"
 	}
+	c.env = env
 	return c, nil
 }

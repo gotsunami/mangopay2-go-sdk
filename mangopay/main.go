@@ -75,7 +75,8 @@ func parseConfig(configfile string) (*mango.Config, error) {
 		return nil, errors.New(fmt.Sprintf("unknown exec environment '%s'. "+
 			"Must be one of production or sandbox.", conf.Env))
 	}
-	return conf, nil
+	return mango.NewConfig(conf.ClientId, conf.Name, conf.Email,
+		conf.Passphrase, conf.Env), nil
 }
 
 func main() {

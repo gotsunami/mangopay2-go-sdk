@@ -7,8 +7,16 @@
 // MangoPay is a platform that allows to accept payments and manage e-money
 // using wallets. See http://www.mangopay.com.
 //
-// First, create an account to authenticate to the service:
-//  doo
+// First, create an account with a unique Id to authenticate to the service:
+//  conf, err := mango.RegisterClient("myclientid", "My Company", "contact@company.com", mango.Sandbox)
+//  if err != nil {
+//      panic(err)
+//  }
+// Or use existing credentials:
+//  conf := mango.NewConfig("myclientid", "My Company", "contact@company.com", "passwd", mango.Sandbox)
+//
+// Then, choose an authentication mode (OAuth2.0 or Basic) to use with the service:
+//  service, err := mango.NewMangoPay(conf, mango.OAuth)
 package mango
 
 import (
