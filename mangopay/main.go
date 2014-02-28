@@ -146,7 +146,7 @@ Options:
 		perror(fmt.Sprintf("config parsing error: %s\n", err.Error()))
 	}
 
-	service, err := mango.NewMangoPay(conf, mango.BasicAuth)
+	service, err := mango.NewMangoPay(conf, mango.OAuth)
 	if err != nil {
 		perror(fmt.Sprintf("can't use service: %s\n", err.Error()))
 	}

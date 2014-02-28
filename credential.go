@@ -5,12 +5,15 @@
 package mango
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 // AuthMode defines authentication methods for communicating with
@@ -24,7 +27,80 @@ const (
 	OAuth
 )
 
+// Holds OAuth2.0 token info.
+type oAuth2 struct {
+	Token     string `json:"access_token"`
+	Type      string `json:"token_type"`
+	ExpiresIn int64  `json:"expires_in"`
+	created   int64
+}
+
+func newToken(m *MangoPay) (*oAuth2, error) {
+	if m == nil {
+		return nil, errors.New("newToken: nil service")
+	}
+
+	gentoken := func(m *MangoPay) (*oAuth2, error) {
+		// Let's get a new access token
+		auth := basicAuthorization(m.clientId, m.password)
+		u, err := url.Parse(rootURLs[m.env] + "oauth/token")
+		if err != nil {
+			return nil, err
+		}
+
+		body := "grant_type=client_credentials"
+		req, err := http.NewRequest("POST", u.String(), strings.NewReader(body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", auth)
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		resp, err := http.DefaultClient.Do(req)
+		b, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		access := new(oAuth2)
+		if err := json.Unmarshal(b, access); err != nil {
+			return nil, err
+		}
+		access.created = time.Now().Unix()
+		// Now we can track the token during its lifetime
+		m.oauth = access
+		return access, nil
+	}
+
+	if m.oauth != nil {
+		if time.Now().Unix()-m.oauth.created < m.oauth.ExpiresIn-60 {
+			return m.oauth, nil // Reuse token
+		}
+	}
+	access, err := gentoken(m)
+	return access, err
+}
+
+// Returns authorization string for basic auth.
+func basicAuthorization(clientId, passwd string) string {
+	credential := clientId + ":" + passwd
+	return "Basic " + base64.StdEncoding.EncodeToString([]byte(credential))
+}
+
+// Returns authorization string for OAuth2.0 auth.
+func oAuthAuthorization(m *MangoPay) (string, error) {
+	if m == nil {
+		return "", errors.New("oAuth2.0: nil service")
+	}
+	o, err := newToken(m)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s %s", o.Type, o.Token), nil
+}
+
 // Config hold environment credentials required for using the API.
+//
+// See http://docs.mangopay.com/api-references/sandbox-credentials/
 type Config struct {
 	ClientId   string
 	Name       string

@@ -81,7 +81,7 @@ func init() {
 
 	log.Printf("Running tests in sandbox as user %s", c.ClientId)
 
-	service, err = mango.NewMangoPay(c, mango.BasicAuth)
+	service, err = mango.NewMangoPay(c, mango.OAuth)
 	if err != nil {
 		log.Fatalf("can't use service: %s\n", err.Error())
 	}

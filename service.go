@@ -13,7 +13,6 @@ package mango
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -47,6 +46,8 @@ type MangoPay struct {
 	rootURL    *url.URL        // Base API URL for the current execution environment
 	verbosity  Level
 	authMethod AuthMode
+	// To track the current token during its lifetime
+	oauth *oAuth2
 }
 
 // ProcessIdent identifies the current operation.
@@ -83,7 +84,7 @@ func NewMangoPay(auth *Config, mode AuthMode) (*MangoPay, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &MangoPay{auth.ClientId, auth.Passphrase, auth.env, u, Info, mode}, nil
+	return &MangoPay{auth.ClientId, auth.Passphrase, auth.env, u, Info, mode, nil}, nil
 }
 
 // Option set various options like verbosity etc.
@@ -142,13 +143,13 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 	// Set header for basic auth
 	if useAuth {
 		if s.authMethod == BasicAuth {
-			credential := s.clientId + ":" + s.password
-			credential = base64.StdEncoding.EncodeToString([]byte(credential))
-			req.Header.Set("Authorization", "Basic "+credential)
+			req.Header.Set("Authorization", basicAuthorization(s.clientId, s.password))
 		} else {
-			// TODO: only basic access auth supported at the moment. Add support
-			// for OAuth2.0.
-			return nil, errors.New("OAuth2.0 access mode not supported.")
+			o, err := oAuthAuthorization(s)
+			if err != nil {
+				return nil, err
+			}
+			req.Header.Set("Authorization", o)
 		}
 	}
 	req.Header.Set("Content-Type", contentType)
