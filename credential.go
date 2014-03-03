@@ -115,14 +115,17 @@ func (c *Config) String() string {
 }
 
 // NewConfig creates a config suitable for NewMangoPay().
-func NewConfig(clientId, name, email, passwd, env string) *Config {
+func NewConfig(clientId, name, email, passwd, env string) (*Config, error) {
 	c := &Config{ClientId: clientId, Name: name, Email: email, Passphrase: passwd, Env: env}
 	if env == "sandbox" {
 		c.env = Sandbox
-	} else {
+	} else if env == "production" {
 		c.env = Production
+	} else {
+		return nil, errors.New(fmt.Sprintf("unknown exec environment '%s'. "+
+			"Must be one of production or sandbox.", env))
 	}
-	return c
+	return c, nil
 }
 
 // RegisterClient asks MangoPay to create a new client account.

@@ -71,12 +71,9 @@ func parseConfig(configfile string) (*mango.Config, error) {
 	if err := json.Unmarshal(data, conf); err != nil {
 		return nil, err
 	}
-	if conf.Env != "production" && conf.Env != "sandbox" {
-		return nil, errors.New(fmt.Sprintf("unknown exec environment '%s'. "+
-			"Must be one of production or sandbox.", conf.Env))
-	}
-	return mango.NewConfig(conf.ClientId, conf.Name, conf.Email,
-		conf.Passphrase, conf.Env), nil
+	c, err := mango.NewConfig(conf.ClientId, conf.Name, conf.Email,
+		conf.Passphrase, conf.Env)
+	return c, err
 }
 
 func main() {

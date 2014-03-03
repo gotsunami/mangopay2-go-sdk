@@ -13,7 +13,7 @@
 //      panic(err)
 //  }
 // Or use existing credentials:
-//  conf := mango.NewConfig("myclientid", "My Company", "contact@company.com", "passwd", mango.Sandbox)
+//  conf, err := mango.NewConfig("myclientid", "My Company", "contact@company.com", "passwd", "sandbox")
 //
 // Then, choose an authentication mode (OAuth2.0 or Basic) to use with the service:
 //  service, err := mango.NewMangoPay(conf, mango.OAuth)
