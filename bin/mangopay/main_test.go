@@ -90,9 +90,9 @@ func init() {
 
 	usersinfo = []user{
 		user{firstName1, lastName1, email1, country, birth1,
-			"4929683808277688", "184", "0217", nil, nil},
+			"4970101122334463", "123", "0219", nil, nil},
 		user{firstName2, lastName2, email2, country, birth2,
-			"4024007183077626", "626", "0918", nil, nil},
+			"4970101122334471", "123", "0919", nil, nil},
 	}
 	users = make([]*mango.NaturalUser, 2)
 }
