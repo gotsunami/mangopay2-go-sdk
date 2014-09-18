@@ -63,3 +63,11 @@ Now run `mangopay` from a terminal to get the list of supported actions:
     Options:
       -d="": JSON data part of the HTTP request
       -v=0: Verbosity level (1 for debug)
+
+## API Docs
+
+The API is available on [GoDoc](http://godoc.org/github.com/gotsunami/mangopay2-go-sdk).
+
+## License
+
+MIT, see LICENSE.
