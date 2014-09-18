@@ -8,12 +8,14 @@
 // using wallets. See http://www.mangopay.com.
 //
 // First, create an account with a unique Id to authenticate to the service:
-//  conf, err := mango.RegisterClient("myclientid", "My Company", "contact@company.com", mango.Sandbox)
+//  conf, err := mango.RegisterClient("myclientid", "My Company",
+//      "contact@company.com", mango.Sandbox)
 //  if err != nil {
 //      panic(err)
 //  }
 // Or use existing credentials:
-//  conf, err := mango.NewConfig("myclientid", "My Company", "contact@company.com", "passwd", "sandbox")
+//  conf, err := mango.NewConfig("myclientid", "My Company",
+//      "contact@company.com", "passwd", "sandbox")
 //
 // Then, choose an authentication mode (OAuth2.0 or Basic) to use with the service:
 //  service, err := mango.NewMangoPay(conf, mango.OAuth)
