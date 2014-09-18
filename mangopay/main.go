@@ -12,7 +12,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/matm/mangopay2-go-sdk"
+	"github.com/gotsunami/mangopay2-go-sdk"
 	"io/ioutil"
 	"net/http"
 	"net/url"
