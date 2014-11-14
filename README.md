@@ -1,3 +1,7 @@
+![mangopay logo](http://go-tsunami.com/assets/images/mangopayLogo.png)
+
+[![GoDoc](https://godoc.org/github.com/gotsunami/mangopay2-go-sdk?status.svg)](https://godoc.org/github.com/gotsunami/mangopay2-go-sdk)
+
 ## Purpose
 
 This project is a [Go](http://www.golang.org) implementation of the [MangoPay HTTP REST api](http://www.mangopay.com/) version 2.
