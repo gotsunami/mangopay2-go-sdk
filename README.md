@@ -30,7 +30,7 @@ Before using it, you must fill a JSON config file with your client credentials (
 ```
 
 Now run `mangopay` from a terminal to get the list of supported actions:
-```bash
+```
 Usage: ./mangopay [options] action configfile
  
 where action is one of: 
