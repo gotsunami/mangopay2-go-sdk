@@ -12,12 +12,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/gotsunami/mangopay2-go-sdk"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/gotsunami/mangopay2-go-sdk"
 )
 
 func perror(msg string) {
