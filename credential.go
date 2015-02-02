@@ -56,6 +56,9 @@ func newToken(m *MangoPay) (*oAuth2, error) {
 		req.Header.Set("Authorization", auth)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
 		b, err := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
@@ -146,6 +149,9 @@ func RegisterClient(clientId, name, email string, env ExecEnvironment) (*Config,
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	b, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
