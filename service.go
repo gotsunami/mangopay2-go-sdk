@@ -23,6 +23,7 @@ package mango
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,6 +47,17 @@ const (
 var rootURLs = map[ExecEnvironment]string{
 	Production: "https://api.mangopay.com/v2/",
 	Sandbox:    "https://api.sandbox.mangopay.com/v2/",
+}
+
+// The default HTTP client to use with the MangoPay api.
+var DefaultClient = &http.Client{
+	Transport: &http.Transport{
+		// Use TLS 1.1 as maximum version acceptable. TLS 1.2 (which is the
+		// default used if not specified) seems no more supported by MangoPay
+		// servers (used to be working though). Using TLS 1.2 results in
+		// "connection reset by peer" errors.
+		TLSClientConfig: &tls.Config{MaxVersion: tls.VersionTLS11},
+	},
 }
 
 // The Mangopay service.
@@ -181,7 +193,7 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 	}
 
 	// Send request
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := DefaultClient.Do(req)
 
 	// Handle reponse status code
 	if resp.StatusCode != http.StatusOK {
@@ -204,8 +216,8 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 	if resp == nil {
 		return errors.New("can't unmarshal nil response")
 	}
+	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
 	if err != nil {
 		return err
 	}

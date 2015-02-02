@@ -48,7 +48,7 @@ func sendRegistrationData(c *mango.CardRegistration, cardNumber,
 	if err != nil {
 		return "", err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := mango.DefaultClient.Do(req)
 
 	if resp.StatusCode != http.StatusOK {
 		return "", errors.New(fmt.Sprintf("Error code %d: %v", resp.StatusCode, err))
