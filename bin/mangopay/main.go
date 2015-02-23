@@ -414,7 +414,7 @@ Options:
 			&mango.Wallet{
 				ProcessIdent: mango.ProcessIdent{Id: w.CreditedWalletId},
 			},
-			w.ReturnUrl, w.Culture)
+			w.ReturnUrl, w.Culture, w.TemplateUrlOptions.Payline)
 		if err != nil {
 			perror(err.Error())
 		}

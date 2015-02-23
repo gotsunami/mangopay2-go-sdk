@@ -62,11 +62,13 @@ func (p *DirectPayIn) String() string {
 type WebPayIn struct {
 	PayIn
 	ReturnUrl          string
-	TemplateUrlOptions string `json:",omitempty"`
-	Culture            string
-	CardType           string
-	RedirectUrl        string
-	service            *MangoPay
+	TemplateUrlOptions struct {
+		Payline string
+	} `json:",omitempty"`
+	Culture     string
+	CardType    string
+	RedirectUrl string
+	service     *MangoPay
 }
 
 func (p *WebPayIn) String() string {
@@ -111,7 +113,7 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 		if err != nil {
 			return nil, errors.New(msg + err.Error())
 		}
-		p.TemplateUrlOptions = "PAYLINE: " + t.String()
+		p.TemplateUrlOptions.Payline = t.String()
 	}
 
 	return p, nil
