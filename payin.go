@@ -67,6 +67,7 @@ type WebPayIn struct {
 	PayIn
 	ReturnUrl          string
 	TemplateURLOptions *TemplateUrlOptions `json:",omitempty"`
+	TemplateURL        string              `json:",omitempty"`
 	Culture            string
 	CardType           string
 	RedirectUrl        string
