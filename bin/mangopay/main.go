@@ -410,11 +410,12 @@ Options:
 		}
 		u := new(mango.LegalUser)
 		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: w.AuthorId}}
+
 		k, err := service.NewWebPayIn(u, w.DebitedFunds, w.Fees,
 			&mango.Wallet{
 				ProcessIdent: mango.ProcessIdent{Id: w.CreditedWalletId},
 			},
-			w.ReturnUrl, w.Culture, w.TemplateUrlOptions.Payline)
+			w.ReturnUrl, w.Culture, w.TemplateURLOptions)
 		if err != nil {
 			perror(err.Error())
 		}

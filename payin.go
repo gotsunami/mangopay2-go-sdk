@@ -21,6 +21,10 @@ func (e *ErrPayInFailed) Error() string {
 	return fmt.Sprintf("payIn %s failed: %s ", e.payinId, e.msg)
 }
 
+type TemplateUrlOptions struct {
+	Payline string `json:"PAYLINE"`
+}
+
 // PayIn holds common fields to all MangoPay's supported payment means
 // (through web, direct, preauthorized, bank wire).
 type PayIn struct {
@@ -62,13 +66,11 @@ func (p *DirectPayIn) String() string {
 type WebPayIn struct {
 	PayIn
 	ReturnUrl          string
-	TemplateUrlOptions struct {
-		Payline string
-	} `json:",omitempty"`
-	Culture     string
-	CardType    string
-	RedirectUrl string
-	service     *MangoPay
+	TemplateURLOptions *TemplateUrlOptions `json:",omitempty"`
+	Culture            string
+	CardType           string
+	RedirectUrl        string
+	service            *MangoPay
 }
 
 func (p *WebPayIn) String() string {
@@ -76,7 +78,7 @@ func (p *WebPayIn) String() string {
 }
 
 // NewWebPayIn creates a new payment.
-func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string, templateUrl string) (*WebPayIn, error) {
+func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string, templateUrl *TemplateUrlOptions) (*WebPayIn, error) {
 	msg := "new web payIn: "
 	if author == nil {
 		return nil, errors.New(msg + "nil author")
@@ -101,19 +103,11 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 			CreditedWalletId: credit.Id,
 			service:          m,
 		},
-		ReturnUrl: u.String(),
-		CardType:  "CB_VISA_MASTERCARD",
-		Culture:   culture,
-		service:   m,
-	}
-
-	// Optional parameter
-	if len(templateUrl) > 0 {
-		t, err := url.Parse(templateUrl)
-		if err != nil {
-			return nil, errors.New(msg + err.Error())
-		}
-		p.TemplateUrlOptions.Payline = t.String()
+		ReturnUrl:          u.String(),
+		TemplateURLOptions: templateUrlOptions,
+		CardType:           "CB_VISA_MASTERCARD",
+		Culture:            culture,
+		service:            m,
 	}
 
 	return p, nil
