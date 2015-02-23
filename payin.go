@@ -61,11 +61,12 @@ func (p *DirectPayIn) String() string {
 // See http://docs.mangopay.com/api-references/payins/payins-card-web/
 type WebPayIn struct {
 	PayIn
-	ReturnUrl   string
-	Culture     string
-	CardType    string
-	RedirectUrl string
-	service     *MangoPay
+	ReturnUrl          string
+	TemplateUrlOptions string `json:",omitempty"`
+	Culture            string
+	CardType           string
+	RedirectUrl        string
+	service            *MangoPay
 }
 
 func (p *WebPayIn) String() string {
@@ -73,7 +74,7 @@ func (p *WebPayIn) String() string {
 }
 
 // NewWebPayIn creates a new payment.
-func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string) (*WebPayIn, error) {
+func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string, templateUrl string) (*WebPayIn, error) {
 	msg := "new web payIn: "
 	if author == nil {
 		return nil, errors.New(msg + "nil author")
@@ -85,6 +86,7 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 	if id == "" {
 		return nil, errors.New(msg + "author has empty Id")
 	}
+
 	u, err := url.Parse(returnUrl)
 	if err != nil {
 		return nil, errors.New(msg + err.Error())
@@ -102,6 +104,16 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 		Culture:   culture,
 		service:   m,
 	}
+
+	// Optional parameter
+	if len(templateUrl) > 0 {
+		t, err := url.Parse(templateUrl)
+		if err != nil {
+			return nil, errors.New(msg + err.Error())
+		}
+		p.TemplateUrlOptions = "PAYLINE: " + t.String()
+	}
+
 	return p, nil
 }
 
