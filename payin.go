@@ -104,7 +104,7 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 			service:          m,
 		},
 		ReturnUrl:          u.String(),
-		TemplateURLOptions: templateUrlOptions,
+		TemplateURLOptions: templateUrl,
 		CardType:           "CB_VISA_MASTERCARD",
 		Culture:            culture,
 		service:            m,
