@@ -121,8 +121,13 @@ func (w *Wallet) Save() error {
 	return nil
 }
 
-func (w *Wallet) Transactions() TransferList {
-	return nil
+// Transactions returns a wallet's transactions.
+func (w *Wallet) Transactions() (TransferList, error) {
+	k, err := w.service.anyRequest(new(TransferList), actionFetchWalletTransactions, JsonObject{"Id": w.Id})
+	if err != nil {
+		return nil, err
+	}
+	return *(k.(*TransferList)), nil
 }
 
 // Wallet finds a legal user using the user_id attribute.
@@ -131,7 +136,9 @@ func (m *MangoPay) Wallet(id string) (*Wallet, error) {
 	if err != nil {
 		return nil, err
 	}
-	return w.(*Wallet), nil
+	wallet := w.(*Wallet)
+	wallet.service = m
+	return wallet, nil
 }
 
 func (m *MangoPay) wallets(u Consumer) (WalletList, error) {
@@ -148,6 +155,5 @@ func (m *MangoPay) wallets(u Consumer) (WalletList, error) {
 
 // Wallet finds all user's wallets. Provided for convenience.
 func (m *MangoPay) Wallets(user Consumer) (WalletList, error) {
-	ws, err := m.wallets(user)
-	return ws, err
+	return m.wallets(user)
 }

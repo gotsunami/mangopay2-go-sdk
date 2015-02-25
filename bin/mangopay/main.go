@@ -322,7 +322,10 @@ Options:
 		if err != nil {
 			perror(err.Error())
 		}
-		trs := w.Transactions()
+		trs, err := w.Transactions()
+		if err != nil {
+			perror(err.Error())
+		}
 		for _, t := range trs {
 			fmt.Println(t)
 		}
