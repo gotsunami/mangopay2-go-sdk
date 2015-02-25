@@ -1,2 +1,4 @@
 *.swp
 *.conf
+tags
+bin/mangopay/mangopay
