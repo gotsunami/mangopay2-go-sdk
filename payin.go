@@ -273,7 +273,7 @@ func (p *PayIn) Refund() (*Refund, error) {
 
 // Cancelled returns true if the payment has been cancelled by user.
 func (p *PayIn) CancelledByUser() bool {
-	return p.ResultCode == ErrUserNotCompleteTransaction || p.ResultCode == ErrUserCancelledPayment
+	return p.ResultCode == ErrTransactionCancelledByUser || p.ResultCode == ErrUserCancelledPayment
 }
 
 // PayIn finds a payment.
