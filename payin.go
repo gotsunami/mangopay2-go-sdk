@@ -271,6 +271,11 @@ func (p *PayIn) Refund() (*Refund, error) {
 	return r, nil
 }
 
+// Cancelled returns true if the payment has been cancelled by user.
+func (p *PayIn) CancelledByUser() bool {
+	return p.ResultCode == ErrUserNotCompleteTransaction || p.ResultCode == ErrUserCancelledPayment
+}
+
 // PayIn finds a payment.
 func (m *MangoPay) PayIn(id string) (*WebPayIn, error) {
 	p, err := m.anyRequest(new(WebPayIn), actionFetchPayIn, JsonObject{"Id": id})
