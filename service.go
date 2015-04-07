@@ -202,11 +202,16 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 		if err != nil {
 			return nil, err
 		}
+		errmsg := ""
 		if msg, ok := j["Message"]; ok {
-			err = errors.New(fmt.Sprintf("%s (%d)", msg.(string), resp.StatusCode))
+			errmsg = fmt.Sprintf("Status %d: %s", resp.StatusCode, msg.(string))
 		} else {
-			err = errors.New(fmt.Sprintf("HTTP status %d; body: '%s'", resp.StatusCode, j))
+			errmsg = fmt.Sprintf("Status %d; body: '%s'", resp.StatusCode, j)
 		}
+		if private, ok := j["errors"]; ok {
+			errmsg += fmt.Sprintf("(details :%v)", private)
+		}
+		err = errors.New(errmsg)
 	}
 	return resp, err
 }
