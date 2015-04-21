@@ -24,7 +24,7 @@ type Money struct {
 }
 
 func (b Money) String() string {
-	return fmt.Sprintf("%.2f %s", float64(b.Amount/100), b.Currency)
+	return fmt.Sprintf("%.2f %s", float64(b.Amount)/100, b.Currency)
 }
 
 // Wallet stores all payins and tranfers from users in order to
