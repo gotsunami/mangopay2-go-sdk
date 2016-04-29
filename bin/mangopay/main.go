@@ -18,7 +18,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gotsunami/mangopay2-go-sdk"
+	"github.com/Adrien-P/mangopay2-go-sdk"
 )
 
 func perror(msg string) {
