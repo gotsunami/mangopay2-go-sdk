@@ -109,8 +109,8 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	},
 	actionFetchUserTransfers: mangoRequest{
 		"GET",
-		"/users/{{Id}}/transactions",
-		JsonObject{"Id": ""},
+		"/users/{{Id}}/transactions?Type={{Type}}",
+		JsonObject{"Id": "", "Type": ""},
 	},
 	actionFetchUserWallets: mangoRequest{
 		"GET",
