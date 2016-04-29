@@ -36,6 +36,7 @@ type Transfer struct {
 	DebitedWalletId  string
 	CreditedWalletId string
 	CreditedFunds    Money
+	Type             string
 	service          *MangoPay
 }
 
@@ -108,7 +109,7 @@ func (t *Transfer) Save() error {
 	}
 
 	// Fields not allowed when creating a tranfer.
-	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status"} {
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status", "Type"} {
 		delete(data, field)
 	}
 
@@ -136,17 +137,17 @@ func (m *MangoPay) Transfer(id string) (*Transfer, error) {
 }
 
 // Transfer finds all user's transactions. Provided for convenience.
-func (m *MangoPay) Transfers(user Consumer) (TransferList, error) {
-	trs, err := m.transfers(user)
+func (m *MangoPay) Transfers(user Consumer, t string) (TransferList, error) {
+	trs, err := m.transfers(user, t)
 	return trs, err
 }
 
-func (m *MangoPay) transfers(u Consumer) (TransferList, error) {
+func (m *MangoPay) transfers(u Consumer, t string) (TransferList, error) {
 	id := consumerId(u)
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	trs, err := m.anyRequest(new(TransferList), actionFetchUserTransfers, JsonObject{"Id": id})
+	trs, err := m.anyRequest(new(TransferList), actionFetchUserTransfers, JsonObject{"Id": id, "Type": t})
 	if err != nil {
 		return nil, err
 	}

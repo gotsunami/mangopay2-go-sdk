@@ -1,6 +1,6 @@
 ![mangopay logo](http://go-tsunami.com/assets/images/mangopayLogo.png)
 
-[![GoDoc](https://godoc.org/github.com/gotsunami/mangopay2-go-sdk?status.svg)](https://godoc.org/github.com/gotsunami/mangopay2-go-sdk)
+[![GoDoc](https://godoc.org/github.com/github.com/Adrien-P/mangopay2-go-sdk?status.svg)](https://godoc.org/github.com/github.com/Adrien-P/mangopay2-go-sdk)
 
 ## Purpose
 
@@ -10,12 +10,12 @@ This project is a [Go](http://www.golang.org) implementation of the [MangoPay HT
 
 Use the api with
 ```bash
-$ go get github.com/gotsunami/mangopay2-go-sdk
+$ go get github.com/github.com/Adrien-P/mangopay2-go-sdk
 ```
 
 A command line tool is also available for testing the MangoPay service easily:
 ```bash
-$ go get github.com/gotsunami/mangopay2-go-sdk/mangopay
+$ go get github.com/github.com/Adrien-P/mangopay2-go-sdk/mangopay
 ```
 
 Before using it, you must fill a JSON config file with your client credentials ([get your sandbox environment credentials](http://docs.mangopay.com/api-references/sandbox-credentials/)):
@@ -84,7 +84,7 @@ Options:
 
 ## API Docs
 
-The API is available on [GoDoc](http://godoc.org/github.com/gotsunami/mangopay2-go-sdk).
+The API is available on [GoDoc](http://godoc.org/github.com/github.com/Adrien-P/mangopay2-go-sdk).
 
 ## License
 

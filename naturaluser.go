@@ -49,8 +49,8 @@ func (u *NaturalUser) Wallets() (WalletList, error) {
 }
 
 // Transfer gets all user's transaction.
-func (u *NaturalUser) Transfers() (TransferList, error) {
-	trs, err := u.service.transfers(u)
+func (u *NaturalUser) Transfers(t string) (TransferList, error) {
+	trs, err := u.service.transfers(u, t)
 	return trs, err
 }
 

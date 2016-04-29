@@ -18,7 +18,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gotsunami/mangopay2-go-sdk"
+	"github.com/Adrien-P/mangopay2-go-sdk"
 )
 
 func perror(msg string) {
@@ -388,14 +388,15 @@ Options:
 		fmt.Println(t)
 	case "transfers":
 		var data struct {
-			Id string
+			Id   string
+			Type string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
 		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
-		trs, err := service.Transfers(u)
+		trs, err := service.Transfers(u, data.Type)
 		if err != nil {
 			perror(err.Error())
 		}
