@@ -55,7 +55,7 @@ func (u *LegalUser) Wallets() (WalletList, error) {
 
 // Transfer gets all user's transaction.
 func (u *LegalUser) Transfers() (TransferList, error) {
-	trs, err := u.service.transfers(u)
+	trs, err := u.service.transfers(u, nil)
 	return trs, err
 }
 
@@ -107,7 +107,7 @@ func (u *LegalUser) Save() error {
 		}
 	}
 
-	ins, err := u.service.anyRequest(new(LegalUser), action, data)
+	ins, err := u.service.anyRequest(new(LegalUser), action, data, nil)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (u *LegalUser) Save() error {
 // LegalUser finds a legal user using the user_id attribute.
 func (m *MangoPay) LegalUser(id string) (*LegalUser, error) {
 	u := new(LegalUser)
-	ins, err := m.anyRequest(u, actionFetchLegalUser, JsonObject{"Id": id})
+	ins, err := m.anyRequest(u, actionFetchLegalUser, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}

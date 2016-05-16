@@ -395,7 +395,7 @@ Options:
 		}
 		u := new(mango.LegalUser)
 		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
-		trs, err := service.Transfers(u)
+		trs, err := service.Transfers(u, nil)
 		if err != nil {
 			perror(err.Error())
 		}

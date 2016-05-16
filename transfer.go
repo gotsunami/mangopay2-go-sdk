@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 )
 
 // Custom error returned in case of failed transaction.
@@ -112,7 +113,7 @@ func (t *Transfer) Save() error {
 		delete(data, field)
 	}
 
-	tr, err := t.service.anyRequest(new(Transfer), actionCreateTransfer, data)
+	tr, err := t.service.anyRequest(new(Transfer), actionCreateTransfer, data, nil)
 	if err != nil {
 		return err
 	}
@@ -128,7 +129,7 @@ func (t *Transfer) Save() error {
 
 // Transfer finds a transaction by id.
 func (m *MangoPay) Transfer(id string) (*Transfer, error) {
-	w, err := m.anyRequest(new(Transfer), actionFetchTransfer, JsonObject{"Id": id})
+	w, err := m.anyRequest(new(Transfer), actionFetchTransfer, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -136,17 +137,17 @@ func (m *MangoPay) Transfer(id string) (*Transfer, error) {
 }
 
 // Transfer finds all user's transactions. Provided for convenience.
-func (m *MangoPay) Transfers(user Consumer) (TransferList, error) {
-	trs, err := m.transfers(user)
+func (m *MangoPay) Transfers(user Consumer, params *url.Values) (TransferList, error) {
+	trs, err := m.transfers(user, params)
 	return trs, err
 }
 
-func (m *MangoPay) transfers(u Consumer) (TransferList, error) {
+func (m *MangoPay) transfers(u Consumer, params *url.Values) (TransferList, error) {
 	id := consumerId(u)
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	trs, err := m.anyRequest(new(TransferList), actionFetchUserTransfers, JsonObject{"Id": id})
+	trs, err := m.anyRequest(new(TransferList), actionFetchUserTransfers, JsonObject{"Id": id}, params)
 	if err != nil {
 		return nil, err
 	}

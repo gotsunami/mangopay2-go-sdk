@@ -32,7 +32,7 @@ func (u *User) String() string {
 // Users returns a list of all registered users, either natural
 // or legal.
 func (m *MangoPay) Users() (UserList, error) {
-	resp, err := m.request(actionAllUsers, nil)
+	resp, err := m.request(actionAllUsers, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (m *MangoPay) Users() (UserList, error) {
 
 // User fetch a user (natural or legal) using the Id attribute.
 func (m *MangoPay) User(id string) (*User, error) {
-	u, err := m.anyRequest(new(User), actionFetchUser, JsonObject{"Id": id})
+	u, err := m.anyRequest(new(User), actionFetchUser, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}

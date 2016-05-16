@@ -7,6 +7,7 @@ package mango
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
 )
 
 // Bank account type.
@@ -143,7 +144,7 @@ func (b *BankAccount) Save() error {
 		delete(data, field)
 	}
 
-	ba, err := b.service.anyRequest(new(BankAccount), actionCreateBankAccount, data)
+	ba, err := b.service.anyRequest(new(BankAccount), actionCreateBankAccount, data, nil)
 	if err != nil {
 		return err
 	}
@@ -161,7 +162,7 @@ func (m *MangoPay) BankAccount(user Consumer, id string) (*BankAccount, error) {
 		return nil, errors.New("user has empty Id")
 	}
 	w, err := m.anyRequest(new(BankAccount), actionFetchBankAccount,
-		JsonObject{"Id": id, "UserId": userId})
+		JsonObject{"Id": id, "UserId": userId}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +175,10 @@ func (m *MangoPay) BankAccounts(user Consumer) (BankAccountList, error) {
 	if userId == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	accs, err := m.anyRequest(new(BankAccountList), actionFetchUserBankAccounts, JsonObject{"Id": userId})
+
+	params := new(url.Values)
+
+	accs, err := m.anyRequest(new(BankAccountList), actionFetchUserBankAccounts, JsonObject{"Id": userId}, params)
 	if err != nil {
 		return nil, err
 	}

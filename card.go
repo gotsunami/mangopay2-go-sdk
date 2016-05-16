@@ -66,7 +66,7 @@ func (c *Card) String() string {
 
 // Card fetches a registered credit card.
 func (m *MangoPay) Card(id string) (*Card, error) {
-	any, err := m.anyRequest(new(Card), actionFetchCard, JsonObject{"Id": id})
+	any, err := m.anyRequest(new(Card), actionFetchCard, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (m *MangoPay) Cards(user Consumer) (CardList, error) {
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	resp, err := m.request(actionFetchUserCards, JsonObject{"Id": id})
+	resp, err := m.request(actionFetchUserCards, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (c *CardRegistration) Init() error {
 		delete(data, field)
 	}
 
-	cr, err := c.service.anyRequest(new(CardRegistration), actionCreateCardRegistration, data)
+	cr, err := c.service.anyRequest(new(CardRegistration), actionCreateCardRegistration, data, nil)
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func (c *CardRegistration) Register(registrationData string) error {
 	}
 	cr, err := c.service.anyRequest(new(CardRegistration),
 		actionSendCardRegistrationData, JsonObject{"Id": c.Id,
-			"RegistrationData": registrationData})
+			"RegistrationData": registrationData}, nil)
 	if err != nil {
 		return err
 	}

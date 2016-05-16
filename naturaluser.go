@@ -50,7 +50,7 @@ func (u *NaturalUser) Wallets() (WalletList, error) {
 
 // Transfer gets all user's transaction.
 func (u *NaturalUser) Transfers() (TransferList, error) {
-	trs, err := u.service.transfers(u)
+	trs, err := u.service.transfers(u, nil)
 	return trs, err
 }
 
@@ -102,7 +102,7 @@ func (u *NaturalUser) Save() error {
 		}
 	}
 
-	user, err := u.service.anyRequest(new(NaturalUser), action, data)
+	user, err := u.service.anyRequest(new(NaturalUser), action, data, nil)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (u *NaturalUser) Save() error {
 
 // NaturalUser finds a natural user using the user_id attribute.
 func (m *MangoPay) NaturalUser(id string) (*NaturalUser, error) {
-	u, err := m.anyRequest(new(NaturalUser), actionFetchNaturalUser, JsonObject{"Id": id})
+	u, err := m.anyRequest(new(NaturalUser), actionFetchNaturalUser, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}

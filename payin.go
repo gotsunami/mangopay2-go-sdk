@@ -136,7 +136,7 @@ func (t *WebPayIn) Save() error {
 		delete(data, field)
 	}
 
-	tr, err := t.service.anyRequest(new(WebPayIn), actionCreateWebPayIn, data)
+	tr, err := t.service.anyRequest(new(WebPayIn), actionCreateWebPayIn, data, nil)
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func (p *DirectPayIn) Save() error {
 		delete(data, field)
 	}
 
-	tr, err := p.service.anyRequest(new(DirectPayIn), actionCreateDirectPayIn, data)
+	tr, err := p.service.anyRequest(new(DirectPayIn), actionCreateDirectPayIn, data, nil)
 	if err != nil {
 		return err
 	}
@@ -278,7 +278,7 @@ func (p *PayIn) CancelledByUser() bool {
 
 // PayIn finds a payment.
 func (m *MangoPay) PayIn(id string) (*WebPayIn, error) {
-	p, err := m.anyRequest(new(WebPayIn), actionFetchPayIn, JsonObject{"Id": id})
+	p, err := m.anyRequest(new(WebPayIn), actionFetchPayIn, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}

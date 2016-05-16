@@ -118,7 +118,7 @@ func (m *MangoPay) Option(opts ...option) {
 
 // request prepares and sends a well formatted HTTP request to the
 // mangopay service.
-func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, error) {
+func (s *MangoPay) request(ma mangoAction, data JsonObject, params *url.Values) (*http.Response, error) {
 	mr, ok := mangoRequests[ma]
 	if !ok {
 		return nil, errors.New("Action not implemented.")
@@ -138,6 +138,10 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 		path = mr.Path
 	}
 
+	if params != nil {
+		path = fmt.Sprintf("%s?%s", path, params.Encode())
+	}
+
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -147,7 +151,7 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 	return resp, err
 }
 
-// rawRequest sends an HTTP request with method method to an arbitrary URI.
+// rawRequest sends an HTTP request with method `method` to an arbitrary URI.
 func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byte, useAuth bool) (*http.Response, error) {
 	if contentType == "" {
 		return nil, errors.New("empty request's content type")
@@ -244,8 +248,8 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 }
 
 // Generic request for any object.
-func (m *MangoPay) anyRequest(o interface{}, action mangoAction, data JsonObject) (interface{}, error) {
-	resp, err := m.request(action, data)
+func (m *MangoPay) anyRequest(o interface{}, action mangoAction, data JsonObject, params *url.Values) (interface{}, error) {
+	resp, err := m.request(action, data, params)
 	if err != nil {
 		return nil, err
 	}

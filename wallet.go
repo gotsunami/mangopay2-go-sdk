@@ -111,7 +111,7 @@ func (w *Wallet) Save() error {
 		}
 	}
 
-	wallet, err := w.service.anyRequest(new(Wallet), action, data)
+	wallet, err := w.service.anyRequest(new(Wallet), action, data, nil)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (w *Wallet) Save() error {
 
 // Transactions returns a wallet's transactions.
 func (w *Wallet) Transactions() (TransferList, error) {
-	k, err := w.service.anyRequest(new(TransferList), actionFetchWalletTransactions, JsonObject{"Id": w.Id})
+	k, err := w.service.anyRequest(new(TransferList), actionFetchWalletTransactions, JsonObject{"Id": w.Id}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (w *Wallet) Transactions() (TransferList, error) {
 
 // Wallet finds a legal user using the user_id attribute.
 func (m *MangoPay) Wallet(id string) (*Wallet, error) {
-	w, err := m.anyRequest(new(Wallet), actionFetchWallet, JsonObject{"Id": id})
+	w, err := m.anyRequest(new(Wallet), actionFetchWallet, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (m *MangoPay) wallets(u Consumer) (WalletList, error) {
 	if id == "" {
 		return nil, errors.New("user has empty Id")
 	}
-	trs, err := m.anyRequest(new(WalletList), actionFetchUserWallets, JsonObject{"Id": id})
+	trs, err := m.anyRequest(new(WalletList), actionFetchUserWallets, JsonObject{"Id": id}, nil)
 	if err != nil {
 		return nil, err
 	}
