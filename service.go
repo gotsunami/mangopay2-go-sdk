@@ -1,5 +1,5 @@
-// Copyright 2014 Mathias Monnerville. All rights reserved.
-// Use of this source code is governed by a GPL
+// Copyright 2014-2016 Mathias Monnerville / Go Tsunami. All rights reserved.
+// Use of this source code is governed by a MIT
 // license that can be found in the LICENSE file.
 
 // Package mango is a library for the MangoPay service v2.
