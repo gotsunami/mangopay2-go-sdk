@@ -50,6 +50,13 @@ const (
 
 	actionCreatePayOut
 	actionFetchPayOut
+
+	actionCreateKYCDocument
+	actionFetchKYCDocument
+	actionSubmitKYCDocument
+	actionCreateKYCPage
+	actionFetchUserKYCDocuments
+	actionFetchAllKYCDocuments
 )
 
 // JsonObject is used to manage JSON data.
@@ -221,5 +228,35 @@ var mangoRequests = map[mangoAction]mangoRequest{
 		"GET",
 		"/payouts/{{Id}}",
 		JsonObject{"Id": ""},
+	},
+	actionCreateKYCDocument: mangoRequest{
+		"POST",
+		"/users/{{UserId}}/kyc/documents",
+		JsonObject{"UserId": ""},
+	},
+	actionFetchKYCDocument: mangoRequest{
+		"GET",
+		"kyc/documents/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionSubmitKYCDocument: mangoRequest{
+		"PUT",
+		"/users/{{UserId}}/kyc/documents/{{Id}}",
+		JsonObject{"UserId": "", "Id": ""},
+	},
+	actionCreateKYCPage: mangoRequest{
+		"POST",
+		"/users/{{UserId}}/kyc/documents/{{Id}}/pages",
+		JsonObject{"UserId": "", "Id": ""},
+	},
+	actionFetchUserKYCDocuments: mangoRequest{
+		"GET",
+		"/users/{{UserId}}/kyc/documents",
+		JsonObject{"UserId": ""},
+	},
+	actionFetchAllKYCDocuments: mangoRequest{
+		"GET",
+		"/kyc/documents",
+		nil,
 	},
 }
