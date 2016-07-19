@@ -17,7 +17,7 @@ type NaturalUser struct {
 	Nationality         string
 	CountryOfResidence  string
 	Occupation          string
-	IncomeRange         string
+	IncomeRange         int
 	ProofOfIdentity     string
 	ProofOfAddress      string
 	service             *MangoPay // Current service
