@@ -13,14 +13,14 @@ func TestKYC(test *testing.T) {
 	if err := user.Save(); err != nil {
 		test.Fatal("Unable to store user:", err)
 	}
-	doc, err := serv.NewDocument(user, "IDENTITY_PROOF", "Tag1")
+	doc, err := serv.NewDocument(user, IdentityProof, "Tag1")
 	if err != nil {
 		test.Fatal("Unable to create identity proof doc:", err)
 	}
 	if err := doc.CreatePage(newPngImageFile()); err != nil {
 		test.Fatal("Unable to create document's page:", err)
 	}
-	if err := doc.Submit("VALIDATION_ASKED", "Tag2"); err != nil {
+	if err := doc.Submit(DocumentStatusValidationAsked, "Tag2"); err != nil {
 		test.Fatal("Unable to submit document")
 	}
 }

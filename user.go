@@ -6,6 +6,16 @@ package mango
 
 import ()
 
+const (
+	KYCLevelLight   = "LIGHT"
+	KYCLevelRegular = "REGULAR"
+)
+
+const (
+	PersonTypeNatural = "NATURAL"
+	PersonTypeLegal   = "LEGAL"
+)
+
 // A Consumer is a legal or natural user with zero, one or
 // more wallets and tranfers.
 type Consumer interface {

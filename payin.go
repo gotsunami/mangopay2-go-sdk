@@ -11,6 +11,54 @@ import (
 	"net/url"
 )
 
+const (
+	TransactionNatureRegular     = "REGULAR"
+	TransactionNatureRepudiation = "REPUDIATION"
+	TransactionNatureRefund      = "REFUND"
+	TransactionNature            = "SETTLEMENT"
+)
+
+const (
+	TransactionStatusCreated   = "CREATED"
+	TransactionStatusSucceeded = "SUCCEEDED"
+	TransactionStatusFailed    = "FAILED"
+)
+
+const (
+	TransactionTypePayIn    = "PAYIN"
+	TransactionTypeTransfer = "TRANSFER"
+	TransactionTypePayOut   = "PAYOUT"
+)
+
+const (
+	PayInPaymentTypeCard          = "CARD"
+	PayInPaymentTypeDirectDebit   = "DIRECT_DEBIT"
+	PayInPaymentTypePreauthorized = "PREAUTHORIZED"
+	PayInPaymentTypeBankWire      = "BANK_WIRE"
+)
+
+const (
+	PayInExecutionTypeWeb    = "WEB"
+	PayInExecutionTypeDirect = "DIRECT"
+)
+
+const (
+	CardTypeCBVisaMasterCard = "CB_VISA_MASTERCARD"
+	CardTypeAmex             = "AMEX"
+	CardTypeDiners           = "DINERS"
+	CardTypeMasterPass       = "MASTERPASS"
+	CardTypeMaestro          = "MAESTRO"
+	CardTypeP24              = "P24"
+	CardTypeIdeal            = "IDEAL"
+	CardTypeBcMC             = "BCMC"
+	CardTypePaylib           = "PAYLIB"
+)
+
+const (
+	SecureModeDefault = "DEFAULT"
+	SecureModeForce   = "FORCE"
+)
+
 // Custom error returned in case of failed payIn.
 type ErrPayInFailed struct {
 	payinId string

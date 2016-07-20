@@ -5,6 +5,25 @@ import (
 	"errors"
 )
 
+type DocumentType string
+
+const (
+	IdentityProof          DocumentType = "IDENTITY_PROOF"
+	RegistrationProof      DocumentType = "REGISTRATION_PROOF"
+	ArticlesOfAssociation  DocumentType = "ARTICLES_OF_ASSOCIATION"
+	ShareholderDeclaration DocumentType = "SHAREHOLDER_DECLARATION"
+	AddressProof           DocumentType = "ADDRESS_PROOF"
+)
+
+type DocumentStatus string
+
+const (
+	DocumentStatusCreated         DocumentStatus = "CREATED"
+	DocumentStatusValidationAsked DocumentStatus = "VALIDATION_ASKED"
+	DocumentStatusValidated       DocumentStatus = "VALIDATED"
+	DocumentStatusRefused         DocumentStatus = "REFUSED"
+)
+
 func (m *MangoPay) Document(id string) (*Document, error) {
 	any, err := m.anyRequest(new(Document), actionFetchKYCDocument, JsonObject{"Id": id})
 	if err != nil {
@@ -13,7 +32,7 @@ func (m *MangoPay) Document(id string) (*Document, error) {
 	return any.(*Document), nil
 }
 
-func (m *MangoPay) NewDocument(user Consumer, docType, tag string) (*Document, error) {
+func (m *MangoPay) NewDocument(user Consumer, docType DocumentType, tag string) (*Document, error) {
 	id := consumerId(user)
 	if id == "" {
 		return nil, errors.New("user has empty Id")
@@ -59,15 +78,15 @@ type DocumentList []*Document
 type Document struct {
 	ProcessIdent
 	UserId               string
-	Status               string
-	Type                 string
+	Status               DocumentStatus
+	Type                 DocumentType
 	RefusedReasonMessage string
 	RefusedReasonType    string
 
 	service *MangoPay
 }
 
-func (d *Document) Submit(status, tag string) error {
+func (d *Document) Submit(status DocumentStatus, tag string) error {
 	data := JsonObject{
 		"Id":     d.Id,
 		"UserId": d.UserId,
