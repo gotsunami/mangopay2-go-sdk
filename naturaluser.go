@@ -89,16 +89,21 @@ func (u *NaturalUser) Save() error {
 		// Delete empty values so that existing ones don't get
 		// overwritten with empty values.
 		for k, v := range data {
-			switch v.(type) {
+			switch casted := v.(type) {
 			case string:
-				if v.(string) == "" {
+				if casted == "" {
 					delete(data, k)
 				}
 			case int:
-				if v.(int) == 0 {
+				if casted == 0 {
 					delete(data, k)
 				}
 			}
+		}
+	}
+	if action == actionCreateNaturalUser {
+		if data["IncomeRange"].(float64) == 0 {
+			delete(data, "IncomeRange")
 		}
 	}
 
