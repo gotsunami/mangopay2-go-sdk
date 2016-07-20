@@ -196,7 +196,7 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 	resp, err := DefaultClient.Do(req)
 
 	// Handle reponse status code
-	if err == nil && resp.StatusCode != http.StatusOK {
+	if err == nil && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		j := JsonObject{}
 		err = s.unMarshalJSONResponse(resp, &j)
 		if err != nil {
@@ -248,6 +248,9 @@ func (m *MangoPay) anyRequest(o interface{}, action mangoAction, data JsonObject
 	resp, err := m.request(action, data)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
 	}
 
 	t := reflect.TypeOf(o)
