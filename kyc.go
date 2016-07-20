@@ -94,6 +94,6 @@ func (d *Document) CreatePage(file []byte) error {
 		"File":   base64.StdEncoding.EncodeToString(file),
 	}
 
-	_, err := d.service.anyRequest(new(JsonObject), actionSubmitKYCDocument, data)
+	_, err := d.service.anyRequest(new(JsonObject), actionCreateKYCPage, data)
 	return err
 }
