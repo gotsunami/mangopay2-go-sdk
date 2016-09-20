@@ -57,6 +57,11 @@ const (
 	actionCreateKYCPage
 	actionFetchUserKYCDocuments
 	actionFetchAllKYCDocuments
+
+	actionCreateHook
+	actionUpdateHook
+	actionFetchHook
+	actionFetchAllHooks
 )
 
 // JsonObject is used to manage JSON data.
@@ -257,6 +262,27 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionFetchAllKYCDocuments: mangoRequest{
 		"GET",
 		"/kyc/documents",
+		nil,
+	},
+
+	actionCreateHook: mangoRequest{
+		"POST",
+		"/hooks",
+		nil,
+	},
+	actionUpdateHook: mangoRequest{
+		"PUT",
+		"/hooks/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchHook: mangoRequest{
+		"GET",
+		"/hooks/{{Id}}",
+		JsonObject{"Id": ""},
+	},
+	actionFetchAllHooks: mangoRequest{
+		"GET",
+		"/hooks/",
 		nil,
 	},
 }
