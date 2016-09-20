@@ -286,7 +286,10 @@ func (p *DirectPayIn) Save() error {
 	}
 
 	// Fields not allowed when creating a tranfer.
-	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType", "SecureMode", "DebitedWalletId", "Type", "Nature"} {
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType",
+		"SecureMode", "DebitedWalletId", "Type", "Nature"} {
+
 		delete(data, field)
 	}
 
@@ -331,4 +334,75 @@ func (m *MangoPay) PayIn(id string) (*WebPayIn, error) {
 		return nil, err
 	}
 	return p.(*WebPayIn), nil
+}
+
+func (m *MangoPay) NewBankwireDirectPayIn(author Consumer, credited *Wallet, amount, fees Money) (*BankwireDirectPayIn, error) {
+	const errorPrefix = "mango.MangoPay.NewBankwireDirectPayIn: "
+	if author == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'author' is nil")
+	}
+	if credited == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'credited' is nil")
+	}
+	authorId := consumerId(author)
+	if authorId == "" {
+		return nil, errors.New(errorPrefix + "'author' has empty Id")
+	}
+
+	p := &BankwireDirectPayIn{
+		PayIn: PayIn{
+			AuthorId:         authorId,
+			DebitedFunds:     amount,
+			Fees:             fees,
+			CreditedWalletId: credited.Id,
+			service:          m,
+		},
+	}
+	return p, nil
+}
+
+type BankwireDirectPayIn struct {
+	PayIn
+}
+
+func (p *BankwireDirectPayIn) String() string {
+	return struct2string(p)
+}
+
+func (t *BankwireDirectPayIn) Save() error {
+	data := JsonObject{}
+	j, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(j, &data); err != nil {
+		return err
+	}
+
+	// Force float64 to int conversion after unmarshalling.
+	for _, field := range []string{"CreationDate", "ExecutionDate"} {
+		data[field] = int(data[field].(float64))
+	}
+
+	// Fields not allowed when creating a tranfer.
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"CreditedUserId", "ResultCode", "ResultMessage", "Status", "ExecutionType",
+		"PaymentType", "SecureMode", "Type", "Nature"} {
+
+		delete(data, field)
+	}
+
+	tr, err := t.service.anyRequest(new(BankwireDirectPayIn), actionCreateBankwireDirectPayIn, data)
+	if err != nil {
+		return err
+	}
+	serv := t.service
+	*t = *(tr.(*BankwireDirectPayIn))
+	t.service = serv
+	t.PayIn.service = serv
+
+	if t.Status == "FAILED" {
+		return &ErrPayInFailed{t.Id, t.ResultMessage}
+	}
+	return nil
 }
