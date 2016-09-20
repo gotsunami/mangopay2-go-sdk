@@ -406,3 +406,90 @@ func (t *BankwireDirectPayIn) Save() error {
 	}
 	return nil
 }
+
+func (m *MangoPay) NewDirectDebitWebPayIn(author Consumer, credited *Wallet, amount, fees Money, returnURL, directDebitType, culture string) (*DirectDebitWebPayIn, error) {
+	const errorPrefix = "mango.MangoPay.NewDirectDebitWebPayIn: "
+	if author == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'author' is nil")
+	}
+	if credited == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'credited' is nil")
+	}
+	authorId := consumerId(author)
+	if authorId == "" {
+		return nil, errors.New(errorPrefix + "'author' has empty Id")
+	}
+	if returnURL == "" {
+		return nil, errors.New(errorPrefix + "Parameter 'returnURL' is empty")
+	}
+	if directDebitType == "" {
+		return nil, errors.New(errorPrefix + "Parameter 'directDebitType' is empty")
+	}
+	if culture == "" {
+		return nil, errors.New(errorPrefix + "Parameter 'culture' is empty")
+	}
+
+	p := &DirectDebitWebPayIn{
+		PayIn: PayIn{
+			AuthorId:         authorId,
+			DebitedFunds:     amount,
+			Fees:             fees,
+			CreditedWalletId: credited.Id,
+			service:          m,
+		},
+		ReturnURL:       returnURL,
+		DirectDebitType: directDebitType,
+		Culture:         culture,
+	}
+	return p, nil
+}
+
+type DirectDebitWebPayIn struct {
+	PayIn
+	ReturnURL          string
+	DirectDebitType    string
+	Culture            string
+	TemplateURLOptions *TemplateUrlOptions `json:",omitempty"`
+	TemplateURL        string              `json:",omitempty"`
+}
+
+func (p *DirectDebitWebPayIn) String() string {
+	return struct2string(p)
+}
+
+func (t *DirectDebitWebPayIn) Save() error {
+	data := JsonObject{}
+	j, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(j, &data); err != nil {
+		return err
+	}
+
+	// Force float64 to int conversion after unmarshalling.
+	for _, field := range []string{"CreationDate", "ExecutionDate"} {
+		data[field] = int(data[field].(float64))
+	}
+
+	// Fields not allowed when creating a tranfer.
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"CreditedUserId", "ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType",
+		"SecureMode", "Type", "Nature"} {
+
+		delete(data, field)
+	}
+
+	tr, err := t.service.anyRequest(new(DirectDebitWebPayIn), actionCreateDirectDebitWebPayIn, data)
+	if err != nil {
+		return err
+	}
+	serv := t.service
+	*t = *(tr.(*DirectDebitWebPayIn))
+	t.PayIn.service = serv
+
+	if t.Status == "FAILED" {
+		return &ErrPayInFailed{t.Id, t.ResultMessage}
+	}
+	return nil
+}
