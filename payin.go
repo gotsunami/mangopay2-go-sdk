@@ -59,6 +59,12 @@ const (
 	SecureModeForce   = "FORCE"
 )
 
+const (
+	DirectDebitTypeSofort  = "SOFORT"
+	DirectDebitTypeELV     = "ELV"
+	DirectDebitTypeGiroPay = "GIROPAY"
+)
+
 // Custom error returned in case of failed payIn.
 type ErrPayInFailed struct {
 	payinId string
@@ -352,17 +358,19 @@ func (m *MangoPay) NewBankwireDirectPayIn(author Consumer, credited *Wallet, amo
 	p := &BankwireDirectPayIn{
 		PayIn: PayIn{
 			AuthorId:         authorId,
-			DebitedFunds:     amount,
-			Fees:             fees,
 			CreditedWalletId: credited.Id,
 			service:          m,
 		},
+		DeclaredDebitedFunds: amount,
+		DeclaredFees:         fees,
 	}
 	return p, nil
 }
 
 type BankwireDirectPayIn struct {
 	PayIn
+	DeclaredDebitedFunds Money
+	DeclaredFees         Money
 }
 
 func (p *BankwireDirectPayIn) String() string {
@@ -387,7 +395,7 @@ func (t *BankwireDirectPayIn) Save() error {
 	// Fields not allowed when creating a tranfer.
 	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
 		"CreditedUserId", "ResultCode", "ResultMessage", "Status", "ExecutionType",
-		"PaymentType", "SecureMode", "Type", "Nature"} {
+		"PaymentType", "SecureMode", "Type", "Nature", "DebitedFunds", "Fees"} {
 
 		delete(data, field)
 	}
@@ -446,6 +454,7 @@ func (m *MangoPay) NewDirectDebitWebPayIn(author Consumer, credited *Wallet, amo
 
 type DirectDebitWebPayIn struct {
 	PayIn
+	RedirectURL        string `json:,omitempty`
 	ReturnURL          string
 	DirectDebitType    string
 	Culture            string
