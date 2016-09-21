@@ -6,7 +6,7 @@ import (
 
 func TestHook_Save(test *testing.T) {
 	service, _ := newTestService()
-	test.Log("Hook creatind...")
+	test.Log("Hook creating...")
 	hook, err := service.NewHook(EventDisputeClosed, "http://sdfkjkdjf.com/hook/fdjsf")
 	if err != nil {
 		test.Fatal("Unable to create hook:", err)

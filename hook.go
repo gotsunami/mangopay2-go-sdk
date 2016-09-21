@@ -93,7 +93,11 @@ func (m *MangoPay) Hooks() (HookList, error) {
 	if err != nil {
 		return nil, err
 	}
-	return *(list.(*HookList)), nil
+	casted := *(list.(*HookList))
+	for _, hook := range casted {
+		hook.service = m
+	}
+	return casted, nil
 }
 
 type HookList []*Hook
