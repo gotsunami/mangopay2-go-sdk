@@ -371,6 +371,8 @@ type BankwireDirectPayIn struct {
 	PayIn
 	DeclaredDebitedFunds Money
 	DeclaredFees         Money
+	WireReference        string            `json:",omitempty"`
+	BankAccount          map[string]string `json:",omitempty"`
 }
 
 func (p *BankwireDirectPayIn) String() string {
