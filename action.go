@@ -76,223 +76,223 @@ type mangoRequest struct {
 
 // Defines mango requests metadata.
 var mangoRequests = map[mangoAction]mangoRequest{
-	actionEvents: mangoRequest{
+	actionEvents: {
 		"GET",
 		"/events",
 		nil,
 	},
-	actionCreateNaturalUser: mangoRequest{
+	actionCreateNaturalUser: {
 		"POST",
 		"/users/natural",
 		nil,
 	},
-	actionEditNaturalUser: mangoRequest{
+	actionEditNaturalUser: {
 		"PUT",
 		"/users/natural/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionAllUsers: mangoRequest{
+	actionAllUsers: {
 		"GET",
 		"/users",
 		nil,
 	},
-	actionFetchNaturalUser: mangoRequest{
+	actionFetchNaturalUser: {
 		"GET",
 		"/users/natural/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionCreateLegalUser: mangoRequest{
+	actionCreateLegalUser: {
 		"POST",
 		"/users/legal",
 		nil,
 	},
-	actionEditLegalUser: mangoRequest{
+	actionEditLegalUser: {
 		"PUT",
 		"/users/legal/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchLegalUser: mangoRequest{
+	actionFetchLegalUser: {
 		"GET",
 		"/users/legal/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchUser: mangoRequest{
+	actionFetchUser: {
 		"GET",
 		"/users/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchUserTransfers: mangoRequest{
+	actionFetchUserTransfers: {
 		"GET",
 		"/users/{{Id}}/transactions",
 		JsonObject{"Id": ""},
 	},
-	actionFetchUserWallets: mangoRequest{
+	actionFetchUserWallets: {
 		"GET",
 		"/users/{{Id}}/wallets",
 		JsonObject{"Id": ""},
 	},
-	actionFetchUserCards: mangoRequest{
+	actionFetchUserCards: {
 		"GET",
 		"/users/{{Id}}/cards",
 		JsonObject{"Id": ""},
 	},
-	actionCreateWallet: mangoRequest{
+	actionCreateWallet: {
 		"POST",
 		"/wallets",
 		nil,
 	},
-	actionEditWallet: mangoRequest{
+	actionEditWallet: {
 		"PUT",
 		"/wallets/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchWallet: mangoRequest{
+	actionFetchWallet: {
 		"GET",
 		"/wallets/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchWalletTransactions: mangoRequest{
+	actionFetchWalletTransactions: {
 		"GET",
 		"/wallets/{{Id}}/transactions",
 		JsonObject{"Id": ""},
 	},
-	actionCreateTransfer: mangoRequest{
+	actionCreateTransfer: {
 		"POST",
 		"/transfers",
 		nil,
 	},
-	actionFetchTransfer: mangoRequest{
+	actionFetchTransfer: {
 		"GET",
 		"/transfers/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchPayIn: mangoRequest{
+	actionFetchPayIn: {
 		"GET",
 		"/payins/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionCreateWebPayIn: mangoRequest{
+	actionCreateWebPayIn: {
 		"POST",
 		"/payins/card/web",
 		nil,
 	},
-	actionCreateDirectPayIn: mangoRequest{
+	actionCreateDirectPayIn: {
 		"POST",
 		"/payins/card/direct",
 		nil,
 	},
-	actionCreateBankwireDirectPayIn: mangoRequest{
+	actionCreateBankwireDirectPayIn: {
 		"POST",
 		"/payins/bankwire/direct",
 		nil,
 	},
-	actionCreateDirectDebitWebPayIn: mangoRequest{
+	actionCreateDirectDebitWebPayIn: {
 		"POST",
 		"/payins/directdebit/web",
 		nil,
 	},
-	actionCreateCardRegistration: mangoRequest{
+	actionCreateCardRegistration: {
 		"POST",
 		"/cardregistrations",
 		nil,
 	},
-	actionSendCardRegistrationData: mangoRequest{
+	actionSendCardRegistrationData: {
 		"PUT",
 		"/CardRegistrations/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchCard: mangoRequest{
+	actionFetchCard: {
 		"GET",
 		"/cards/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionCreateTransferRefund: mangoRequest{
+	actionCreateTransferRefund: {
 		"POST",
 		"/transfers/{{TransferId}}/refunds",
 		JsonObject{"TransferId": ""},
 	},
-	actionCreatePayInRefund: mangoRequest{
+	actionCreatePayInRefund: {
 		"POST",
 		"/payins/{{PayInId}}/refunds",
 		JsonObject{"PayInId": ""},
 	},
-	actionFetchRefund: mangoRequest{
+	actionFetchRefund: {
 		"GET",
 		"/refunds/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionCreateBankAccount: mangoRequest{
+	actionCreateBankAccount: {
 		"POST",
 		"/users/{{UserId}}/bankaccounts/{{Type}}",
 		JsonObject{"UserId": "", "Type": ""},
 	},
-	actionFetchBankAccount: mangoRequest{
+	actionFetchBankAccount: {
 		"GET",
 		"/users/{{UserId}}/bankaccounts/{{Id}}",
 		JsonObject{"UserId": "", "Id": ""},
 	},
-	actionFetchUserBankAccounts: mangoRequest{
+	actionFetchUserBankAccounts: {
 		"GET",
 		"/users/{{Id}}/bankaccounts",
 		JsonObject{"Id": ""},
 	},
-	actionCreatePayOut: mangoRequest{
+	actionCreatePayOut: {
 		"POST",
 		"/payouts/bankwire",
 		nil,
 	},
-	actionFetchPayOut: mangoRequest{
+	actionFetchPayOut: {
 		"GET",
 		"/payouts/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionCreateKYCDocument: mangoRequest{
+	actionCreateKYCDocument: {
 		"POST",
 		"/users/{{UserId}}/kyc/documents",
 		JsonObject{"UserId": ""},
 	},
-	actionFetchKYCDocument: mangoRequest{
+	actionFetchKYCDocument: {
 		"GET",
-		"kyc/documents/{{Id}}",
+		"/kyc/documents/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionSubmitKYCDocument: mangoRequest{
+	actionSubmitKYCDocument: {
 		"PUT",
 		"/users/{{UserId}}/kyc/documents/{{Id}}",
 		JsonObject{"UserId": "", "Id": ""},
 	},
-	actionCreateKYCPage: mangoRequest{
+	actionCreateKYCPage: {
 		"POST",
 		"/users/{{UserId}}/kyc/documents/{{Id}}/pages",
 		JsonObject{"UserId": "", "Id": ""},
 	},
-	actionFetchUserKYCDocuments: mangoRequest{
+	actionFetchUserKYCDocuments: {
 		"GET",
 		"/users/{{UserId}}/kyc/documents",
 		JsonObject{"UserId": ""},
 	},
-	actionFetchAllKYCDocuments: mangoRequest{
+	actionFetchAllKYCDocuments: {
 		"GET",
 		"/kyc/documents",
 		nil,
 	},
 
-	actionCreateHook: mangoRequest{
+	actionCreateHook: {
 		"POST",
 		"/hooks",
 		nil,
 	},
-	actionUpdateHook: mangoRequest{
+	actionUpdateHook: {
 		"PUT",
 		"/hooks/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchHook: mangoRequest{
+	actionFetchHook: {
 		"GET",
 		"/hooks/{{Id}}",
 		JsonObject{"Id": ""},
 	},
-	actionFetchAllHooks: mangoRequest{
+	actionFetchAllHooks: {
 		"GET",
 		"/hooks/",
 		nil,
