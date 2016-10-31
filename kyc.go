@@ -70,7 +70,11 @@ func (m *MangoPay) Documents(user Consumer) (DocumentList, error) {
 	if err != nil {
 		return nil, err
 	}
-	return list.(DocumentList), nil
+	casted := *(list.(*DocumentList))
+	for _, doc := range casted {
+		doc.service = m
+	}
+	return casted, nil
 }
 
 type DocumentList []*Document
