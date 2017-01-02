@@ -8,6 +8,15 @@ import (
 	"encoding/json"
 )
 
+const (
+	RefundReasonInitializedByClient                   = "INITIALIZED_BY_CLIENT"
+	RefundReasonBankaccountIncorrect                  = "BANKACCOUNT_INCORRECT"
+	RefundReasonOwnerDoNotMatchBankaccount            = "OWNER_DOT_NOT_MATCH_BANKACCOUNT"
+	RefundReasonBankaccountHasBeenClosed              = "BANKACCOUNT_HAS_BEEN_CLOSED"
+	RefundReasonWithdrawalImpossibleOnSavingsAccounts = "WITHDRAWAL_IMPOSSIBLE_ON_SAVINGS_ACCOUNTS"
+	RefundReasonOther                                 = "OTHER"
+)
+
 // List of refunds.
 type RefundList []*Refund
 
@@ -36,6 +45,8 @@ type Refund struct {
 	InitialTransactionType string
 	DebitedWalletId        string
 	CreditedWalletId       string
+	RefundReasonType       string
+	RefundReasonMessage    string
 
 	transfer *Transfer
 	payIn    *PayIn
