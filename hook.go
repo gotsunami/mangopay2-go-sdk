@@ -2,6 +2,7 @@ package mango
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 func (m *MangoPay) NewHook(eventType EventType, url string) (*Hook, error) {
@@ -86,6 +87,29 @@ func (m *MangoPay) Hook(id string) (*Hook, error) {
 	hook := h.(*Hook)
 	hook.service = m
 	return hook, nil
+}
+
+// HookByEventType returns the only hook for given event type.
+// see https://docs.mangopay.com/endpoints/v2.01/hooks#e247_create-a-hook
+func (m *MangoPay) HookByEventType(eventType EventType) (*Hook, error) {
+	hooks, err := m.Hooks()
+	if err != nil {
+		return nil, err
+	}
+
+	var result *Hook
+	for _, hook := range hooks {
+		if hook.EventType == eventType {
+			result = hook
+			break
+		}
+	}
+
+	if result == nil {
+		return nil, fmt.Errorf("No hook found for event type %s", eventType)
+	}
+
+	return result, nil
 }
 
 func (m *MangoPay) Hooks() (HookList, error) {
