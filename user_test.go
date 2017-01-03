@@ -6,7 +6,7 @@ import (
 )
 
 func TestNaturalUserSave(test *testing.T) {
-	serv, _ := newTestService()
+	serv := newTestService(test)
 	user := createTestUser(serv)
 	test.Log("Storing user...")
 	if err := user.Save(); err != nil {

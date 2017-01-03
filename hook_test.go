@@ -5,7 +5,7 @@ import (
 )
 
 func TestHook_Save(test *testing.T) {
-	service, _ := newTestService()
+	service := newTestService(test)
 	test.Log("Hook creating...")
 	hook, err := service.NewHook(EventDisputeClosed, "http://sdfkjkdjf.com/hook/fdjsf")
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 )
 
 func TestWalletSave(test *testing.T) {
-	serv, _ := newTestService()
+	serv := newTestService(test)
 	createTestWallet(test, serv, nil)
 }
 

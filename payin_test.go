@@ -5,7 +5,7 @@ import (
 )
 
 func TestBankwireDirectPayIn_Save(test *testing.T) {
-	serv, _ := newTestService()
+	serv := newTestService(test)
 	user := createTestUser(serv)
 	if err := user.Save(); err != nil {
 		test.Fatal("Unable to store user", err)
@@ -31,7 +31,7 @@ func TestBankwireDirectPayIn_Save(test *testing.T) {
 }
 
 func TestDirectDebitWebPayIn_Save(test *testing.T) {
-	serv, _ := newTestService()
+	serv := newTestService(test)
 	user := createTestUser(serv)
 	if err := user.Save(); err != nil {
 		test.Fatal("Unable to store user", err)
