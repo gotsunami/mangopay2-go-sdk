@@ -47,6 +47,10 @@ func TestDirectDebitWebPayIn_Save(test *testing.T) {
 		Currency: "EUR",
 		Amount:   0,
 	}
+	createTestDirectDebitWebPayIn(test, serv, user, amount, fees, wallet)
+}
+
+func createTestDirectDebitWebPayIn(test *testing.T, serv *MangoPay, user Consumer, amount Money, fees Money, wallet *Wallet) *DirectDebitWebPayIn {
 	payIn, err := serv.NewDirectDebitWebPayIn(user, wallet, amount, fees, "https://google.com", DirectDebitTypeSofort, "DE")
 	if err != nil {
 		test.Fatal("Unable to create pay-in:", err)
@@ -54,4 +58,5 @@ func TestDirectDebitWebPayIn_Save(test *testing.T) {
 	if err = payIn.Save(); err != nil {
 		test.Fatal("Unable to store pay-in:", err)
 	}
+	return payIn
 }
