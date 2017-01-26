@@ -45,12 +45,16 @@ type Refund struct {
 	InitialTransactionType string
 	DebitedWalletId        string
 	CreditedWalletId       string
-	RefundReasonType       string
-	RefundReasonMessage    string
+	RefundReason           RefundReason
 
 	transfer *Transfer
 	payIn    *PayIn
 	kind     refundKind
+}
+
+type RefundReason struct {
+	RefundReasonType    string
+	RefundReasonMessage string
 }
 
 func (r *Refund) String() string {
