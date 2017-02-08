@@ -133,7 +133,7 @@ func (p *WebPayIn) String() string {
 }
 
 // NewWebPayIn creates a new payment.
-func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string, templateUrl *TemplateUrlOptions) (*WebPayIn, error) {
+func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, cardType string, culture string, templateUrl *TemplateUrlOptions) (*WebPayIn, error) {
 	msg := "new web payIn: "
 	if author == nil {
 		return nil, errors.New(msg + "nil author")
@@ -160,7 +160,7 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 		},
 		ReturnUrl:          u.String(),
 		TemplateURLOptions: templateUrl,
-		CardType:           "CB_VISA_MASTERCARD",
+		CardType:           cardType,
 		Culture:            culture,
 		service:            m,
 	}
