@@ -125,6 +125,9 @@ type WebPayIn struct {
 	Culture            string
 	CardType           string
 	RedirectUrl        string
+	DirectDebitType    string          `json:",omitempty"`
+	WireReference      string          `json:",omitempty"`
+	BankAccount        json.RawMessage `json:",omitempty"`
 	service            *MangoPay
 }
 
