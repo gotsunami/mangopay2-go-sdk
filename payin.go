@@ -65,14 +65,14 @@ const (
 	DirectDebitTypeGiroPay = "GIROPAY"
 )
 
-// Custom error returned in case of failed payIn.
+// ErrPayInFailed is custom error returned in case of failed payIn.
 type ErrPayInFailed struct {
-	payinId string
-	msg     string
+	ID  string
+	Msg string
 }
 
 func (e *ErrPayInFailed) Error() string {
-	return fmt.Sprintf("payIn %s failed: %s ", e.payinId, e.msg)
+	return fmt.Sprintf("payIn %s failed: %s ", e.ID, e.Msg)
 }
 
 type TemplateUrlOptions struct {
