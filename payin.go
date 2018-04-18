@@ -71,6 +71,9 @@ type ErrPayInFailed struct {
 	Msg string
 }
 
+// PayinFailedAmountTooHigh is ErrPayInFailed.Msg value when transaction amount is too high.
+const PayinFailedAmountTooHigh = "Transaction amount is higher than maximum permitted amount"
+
 func (e *ErrPayInFailed) Error() string {
 	return fmt.Sprintf("payIn %s failed: %s ", e.ID, e.Msg)
 }
