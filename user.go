@@ -4,8 +4,6 @@
 
 package mango
 
-import ()
-
 const (
 	KYCLevelLight   = "LIGHT"
 	KYCLevelRegular = "REGULAR"

@@ -128,7 +128,7 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 	path := mr.Path
 	if mr.PathValues != nil {
 		// Substitute path variables, if any
-		for name, _ := range mr.PathValues {
+		for name := range mr.PathValues {
 			if _, ok := data[name]; !ok {
 				return nil, errors.New(fmt.Sprintf("missing keyword %s", name))
 			}

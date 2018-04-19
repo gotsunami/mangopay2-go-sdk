@@ -17,4 +17,5 @@ const (
 	// Generic transaction errors
 	ErrUserNotCompleteTransaction = "101001"
 	ErrTransactionCancelledByUser = "101002"
+	ErrTransactionAmountTooHigh   = "001011"
 )

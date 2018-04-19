@@ -4,8 +4,6 @@
 
 package mango
 
-import ()
-
 type option func(*MangoPay)
 
 type Level int

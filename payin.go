@@ -67,8 +67,9 @@ const (
 
 // ErrPayInFailed is custom error returned in case of failed payIn.
 type ErrPayInFailed struct {
-	ID  string
-	Msg string
+	ID   string
+	Msg  string
+	Code string
 }
 
 // PayinFailedAmountTooHigh is ErrPayInFailed.Msg value when transaction amount is too high.
@@ -208,7 +209,7 @@ func (t *WebPayIn) Save() error {
 	t.PayIn.service = serv
 
 	if t.Status == "FAILED" {
-		return &ErrPayInFailed{t.Id, t.ResultMessage}
+		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
 	}
 	return nil
 }
@@ -317,7 +318,7 @@ func (p *DirectPayIn) Save() error {
 	p.PayIn.service = serv
 
 	if p.Status == "FAILED" {
-		return &ErrPayInFailed{p.Id, p.ResultMessage}
+		return &ErrPayInFailed{p.Id, p.ResultMessage, p.ResultCode}
 	}
 	return nil
 }
@@ -420,7 +421,7 @@ func (t *BankwireDirectPayIn) Save() error {
 	t.PayIn.service = serv
 
 	if t.Status == "FAILED" {
-		return &ErrPayInFailed{t.Id, t.ResultMessage}
+		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
 	}
 	return nil
 }
@@ -508,7 +509,7 @@ func (t *DirectDebitWebPayIn) Save() error {
 	t.PayIn.service = serv
 
 	if t.Status == "FAILED" {
-		return &ErrPayInFailed{t.Id, t.ResultMessage}
+		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
 	}
 	return nil
 }
