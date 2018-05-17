@@ -88,7 +88,7 @@ type TemplateUrlOptions struct {
 type PayIn struct {
 	ProcessReply
 	AuthorId         string
-	CreditedUserId   string
+	CreditedUserId   string `json:",omitempty"`
 	DebitedFunds     Money
 	Fees             Money
 	CreditedWalletId string
@@ -217,7 +217,7 @@ func (t *WebPayIn) Save() error {
 // NewDirectPayIn creates a direct payment from a tokenized credit card.
 //
 //  - from     : AuthorId value
-//  - to       : CreditedUserId value
+//  - to       : CreditedUserId value (optional, defaults to dst owner)
 //  - src      : CardId value
 //  - dst      : CreditedWalletId value
 //  - amount   : DebitedFunds value
@@ -232,7 +232,6 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 		msg string
 	}{
 		{from, "from parameter"},
-		{to, "to parameter"},
 		{src, "card"},
 		{dst, "wallet"},
 	}
@@ -245,16 +244,15 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 		return nil, errors.New(msg + "empty return url")
 	}
 
-	cons := make([]string, 2)
-	for k, con := range []Consumer{from, to} {
-		id := consumerId(con)
-		cons[k] = id
+	var	authorID, creditedUserID string
+	authorID = consumerId(from)
+	if to != nil {
+		creditedUserID = consumerId(to)
 	}
 
 	// Check Ids
 	for _, i := range []struct{ v, msg string }{
-		{cons[0], "from consumer"},
-		{cons[1], "to consumer"},
+		{authorID, "from consumer"},
 		{dst.Id, "wallet"},
 		{src.Id, "card"},
 	} {
@@ -269,8 +267,8 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 	}
 	p := &DirectPayIn{
 		PayIn: PayIn{
-			AuthorId:         cons[0],
-			CreditedUserId:   cons[1],
+			AuthorId:         authorID,
+			CreditedUserId:   creditedUserID,
 			DebitedFunds:     amount,
 			Fees:             fees,
 			CreditedWalletId: dst.Id,
