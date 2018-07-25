@@ -88,6 +88,16 @@ type ProcessReply struct {
 	ExecutionDate int64
 }
 
+type HTTPError struct {
+	Code    int
+	Message string
+	Details map[string]string
+}
+
+func (e HTTPError) Error() string {
+	return e.Message
+}
+
 // NewMangoPay creates a suitable environment for accessing
 // the web service. Default verbosity level is set to Info, which can be
 // changed through the use of Option().
@@ -202,16 +212,18 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 		if err != nil {
 			return nil, err
 		}
-		errmsg := ""
+		HTTPErr := HTTPError{
+			Code: resp.StatusCode,
+		}
 		if msg, ok := j["Message"]; ok {
-			errmsg = fmt.Sprintf("Status %d: %s", resp.StatusCode, msg.(string))
+			HTTPErr.Message = msg.(string)
 		} else {
-			errmsg = fmt.Sprintf("Status %d; body: '%s'", resp.StatusCode, j)
+			HTTPErr.Message = fmt.Sprintf("Response body: '%s'", j)
 		}
-		if private, ok := j["errors"]; ok {
-			errmsg += fmt.Sprintf("(details :%v)", private)
+		if details, ok := j["errors"]; ok {
+			HTTPErr.Details = details.(map[string]string)
 		}
-		err = errors.New(errmsg)
+		err = HTTPErr
 	}
 	return resp, err
 }
