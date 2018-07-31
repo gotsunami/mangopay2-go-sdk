@@ -91,7 +91,7 @@ type ProcessReply struct {
 type HTTPError struct {
 	Code    int
 	Message string
-	Details map[string]string
+	Details map[string]interface{}
 }
 
 func (e HTTPError) Error() string {
@@ -221,7 +221,9 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 			HTTPErr.Message = fmt.Sprintf("Response body: '%s'", j)
 		}
 		if details, ok := j["errors"]; ok {
-			HTTPErr.Details = details.(map[string]string)
+			if HTTPErr.Details, ok = details.(map[string]interface{}); !ok {
+				HTTPErr.Details = map[string]interface{}{"Error": "Error details returned is not map[string]interface{}"}
+			}
 		}
 		err = HTTPErr
 	}
