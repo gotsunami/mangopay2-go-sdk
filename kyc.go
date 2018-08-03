@@ -24,6 +24,20 @@ const (
 	DocumentStatusRefused         DocumentStatus = "REFUSED"
 )
 
+type DocumentRefusedReasonType string
+
+const (
+	DocumentRefusedReasonTypeUnreadable          DocumentRefusedReasonType = "DOCUMENT_UNREADABLE"
+	DocumentRefusedReasonTypeNotAccepted         DocumentRefusedReasonType = "DOCUMENT_NOT_ACCEPTED"
+	DocumentRefusedReasonTypeHasExpired          DocumentRefusedReasonType = "DOCUMENT_HAS_EXPIRED"
+	DocumentRefusedReasonTypeIncomplete          DocumentRefusedReasonType = "DOCUMENT_INCOMPLETE"
+	DocumentRefusedReasonTypeNotMatchUserData    DocumentRefusedReasonType = "DOCUMENT_DO_NOT_MATCH_USER_DATA"
+	DocumentRefusedReasonTypeNotMatchAccountData DocumentRefusedReasonType = "DOCUMENT_DO_NOT_MATCH_ACCOUNT_DATA"
+	DocumentRefusedReasonTypeFalsified           DocumentRefusedReasonType = "DOCUMENT_FALSIFIED"
+	DocumentRefusedReasonTypeUnderagePerson      DocumentRefusedReasonType = "UNDERAGE PERSON"
+	DocumentRefusedReasonTypeSpecificCase        DocumentRefusedReasonType = "SPECIFIC_CASE"
+)
+
 func (m *MangoPay) Document(id string) (*Document, error) {
 	any, err := m.anyRequest(new(Document), actionFetchKYCDocument, JsonObject{"Id": id})
 	if err != nil {
@@ -85,7 +99,7 @@ type Document struct {
 	Status               DocumentStatus
 	Type                 DocumentType
 	RefusedReasonMessage string
-	RefusedReasonType    string
+	RefusedReasonType    DocumentRefusedReasonType
 
 	service *MangoPay
 }
