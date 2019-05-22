@@ -252,7 +252,7 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG RESPONSE")
 	}
 	if err := json.Unmarshal(b, v); err != nil {
-		return err
+		return errors.New(fmt.Sprintf("error: %s, Mangopay server response: %s", err.Error(), string(b)))
 	}
 	return nil
 }
