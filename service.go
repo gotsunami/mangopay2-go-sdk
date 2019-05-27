@@ -203,9 +203,9 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 	}
 
 	// Send request
-	resp, err := DefaultClient.Do(req)
+	resp, err := NewDefaultHTTPClientRetryWrap(DefaultClient).do(req)
 
-	// Handle reponse status code
+	// Handle response status code
 	if err == nil && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		j := JsonObject{}
 		err = s.unMarshalJSONResponse(resp, &j)
