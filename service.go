@@ -95,7 +95,7 @@ type HTTPError struct {
 }
 
 func (e HTTPError) Error() string {
-	return e.Message
+	return fmt.Sprintf("Code: %s, Message: %s, Details: %s", e.Code, e.Message, e.Details)
 }
 
 // NewMangoPay creates a suitable environment for accessing
