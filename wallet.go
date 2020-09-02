@@ -10,6 +10,12 @@ import (
 	"fmt"
 )
 
+const (
+	FundsTypeDefault = "DEFAULT"
+	FundsTypeFees    = "FEES"
+	FundsTypeCreadit = "CREDIT"
+)
+
 // List of wallets.
 type WalletList []*Wallet
 

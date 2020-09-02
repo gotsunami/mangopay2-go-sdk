@@ -37,6 +37,7 @@ type PayOut struct {
 	BankAccountId     string
 	CreditedFunds     Money
 	MeanOfPaymentType string
+	BankWireRef       string
 	service           *MangoPay
 }
 

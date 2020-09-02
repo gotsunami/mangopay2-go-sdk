@@ -11,14 +11,72 @@ import (
 	"net/url"
 )
 
-// Custom error returned in case of failed payIn.
+const (
+	TransactionNatureRegular     = "REGULAR"
+	TransactionNatureRepudiation = "REPUDIATION"
+	TransactionNatureRefund      = "REFUND"
+	TransactionNature            = "SETTLEMENT"
+)
+
+const (
+	TransactionStatusCreated   = "CREATED"
+	TransactionStatusSucceeded = "SUCCEEDED"
+	TransactionStatusFailed    = "FAILED"
+)
+
+const (
+	TransactionTypePayIn    = "PAYIN"
+	TransactionTypeTransfer = "TRANSFER"
+	TransactionTypePayOut   = "PAYOUT"
+)
+
+const (
+	PayInPaymentTypeCard          = "CARD"
+	PayInPaymentTypeDirectDebit   = "DIRECT_DEBIT"
+	PayInPaymentTypePreauthorized = "PREAUTHORIZED"
+	PayInPaymentTypeBankWire      = "BANK_WIRE"
+)
+
+const (
+	PayInExecutionTypeWeb    = "WEB"
+	PayInExecutionTypeDirect = "DIRECT"
+)
+
+const (
+	CardTypeCBVisaMasterCard = "CB_VISA_MASTERCARD"
+	CardTypeAmex             = "AMEX"
+	CardTypeDiners           = "DINERS"
+	CardTypeMasterPass       = "MASTERPASS"
+	CardTypeMaestro          = "MAESTRO"
+	CardTypeP24              = "P24"
+	CardTypeIdeal            = "IDEAL"
+	CardTypeBcMC             = "BCMC"
+	CardTypePaylib           = "PAYLIB"
+)
+
+const (
+	SecureModeDefault = "DEFAULT"
+	SecureModeForce   = "FORCE"
+)
+
+const (
+	DirectDebitTypeSofort  = "SOFORT"
+	DirectDebitTypeELV     = "ELV"
+	DirectDebitTypeGiroPay = "GIROPAY"
+)
+
+// ErrPayInFailed is custom error returned in case of failed payIn.
 type ErrPayInFailed struct {
-	payinId string
-	msg     string
+	ID   string
+	Msg  string
+	Code string
 }
 
+// PayinFailedAmountTooHigh is ErrPayInFailed.Msg value when transaction amount is too high.
+const PayinFailedAmountTooHigh = "Transaction amount is higher than maximum permitted amount"
+
 func (e *ErrPayInFailed) Error() string {
-	return fmt.Sprintf("payIn %s failed: %s ", e.payinId, e.msg)
+	return fmt.Sprintf("payIn %s failed: %s ", e.ID, e.Msg)
 }
 
 type TemplateUrlOptions struct {
@@ -30,7 +88,7 @@ type TemplateUrlOptions struct {
 type PayIn struct {
 	ProcessReply
 	AuthorId         string
-	CreditedUserId   string
+	CreditedUserId   string `json:",omitempty"`
 	DebitedFunds     Money
 	Fees             Money
 	CreditedWalletId string
@@ -50,10 +108,11 @@ func (p *PayIn) String() string {
 // DirectPayIn is used to process a payment with registered (tokenized) cards.
 type DirectPayIn struct {
 	PayIn
-	SecureModeReturnUrl string
-	CardId              string
-	DebitedWalletId     string
-	service             *MangoPay
+	SecureModeReturnUrl   string
+	SecureModeRedirectURL string
+	CardId                string
+	DebitedWalletId       string
+	service               *MangoPay
 }
 
 func (p *DirectPayIn) String() string {
@@ -71,6 +130,10 @@ type WebPayIn struct {
 	Culture            string
 	CardType           string
 	RedirectUrl        string
+	DirectDebitType    string          `json:",omitempty"`
+	WireReference      string          `json:",omitempty"`
+	BankAccount        json.RawMessage `json:",omitempty"`
+	Tag                string          `json:",omitempty"`
 	service            *MangoPay
 }
 
@@ -79,7 +142,7 @@ func (p *WebPayIn) String() string {
 }
 
 // NewWebPayIn creates a new payment.
-func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, culture string, templateUrl *TemplateUrlOptions) (*WebPayIn, error) {
+func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit *Wallet, returnUrl string, cardType string, culture string, templateUrl *TemplateUrlOptions) (*WebPayIn, error) {
 	msg := "new web payIn: "
 	if author == nil {
 		return nil, errors.New(msg + "nil author")
@@ -106,7 +169,7 @@ func (m *MangoPay) NewWebPayIn(author Consumer, amount Money, fees Money, credit
 		},
 		ReturnUrl:          u.String(),
 		TemplateURLOptions: templateUrl,
-		CardType:           "CB_VISA_MASTERCARD",
+		CardType:           cardType,
 		Culture:            culture,
 		service:            m,
 	}
@@ -146,7 +209,7 @@ func (t *WebPayIn) Save() error {
 	t.PayIn.service = serv
 
 	if t.Status == "FAILED" {
-		return &ErrPayInFailed{t.Id, t.ResultMessage}
+		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
 	}
 	return nil
 }
@@ -154,7 +217,7 @@ func (t *WebPayIn) Save() error {
 // NewDirectPayIn creates a direct payment from a tokenized credit card.
 //
 //  - from     : AuthorId value
-//  - to       : CreditedUserId value
+//  - to       : CreditedUserId value (optional, defaults to dst owner)
 //  - src      : CardId value
 //  - dst      : CreditedWalletId value
 //  - amount   : DebitedFunds value
@@ -169,7 +232,6 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 		msg string
 	}{
 		{from, "from parameter"},
-		{to, "to parameter"},
 		{src, "card"},
 		{dst, "wallet"},
 	}
@@ -182,16 +244,15 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 		return nil, errors.New(msg + "empty return url")
 	}
 
-	cons := make([]string, 2)
-	for k, con := range []Consumer{from, to} {
-		id := consumerId(con)
-		cons[k] = id
+	var	authorID, creditedUserID string
+	authorID = consumerId(from)
+	if to != nil {
+		creditedUserID = consumerId(to)
 	}
 
 	// Check Ids
 	for _, i := range []struct{ v, msg string }{
-		{cons[0], "from consumer"},
-		{cons[1], "to consumer"},
+		{authorID, "from consumer"},
 		{dst.Id, "wallet"},
 		{src.Id, "card"},
 	} {
@@ -206,8 +267,8 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 	}
 	p := &DirectPayIn{
 		PayIn: PayIn{
-			AuthorId:         cons[0],
-			CreditedUserId:   cons[1],
+			AuthorId:         authorID,
+			CreditedUserId:   creditedUserID,
 			DebitedFunds:     amount,
 			Fees:             fees,
 			CreditedWalletId: dst.Id,
@@ -238,7 +299,10 @@ func (p *DirectPayIn) Save() error {
 	}
 
 	// Fields not allowed when creating a tranfer.
-	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType", "SecureMode", "DebitedWalletId", "Type", "Nature"} {
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType",
+		"SecureMode", "DebitedWalletId", "Type", "Nature"} {
+
 		delete(data, field)
 	}
 
@@ -252,7 +316,7 @@ func (p *DirectPayIn) Save() error {
 	p.PayIn.service = serv
 
 	if p.Status == "FAILED" {
-		return &ErrPayInFailed{p.Id, p.ResultMessage}
+		return &ErrPayInFailed{p.Id, p.ResultMessage, p.ResultCode}
 	}
 	return nil
 }
@@ -283,4 +347,167 @@ func (m *MangoPay) PayIn(id string) (*WebPayIn, error) {
 		return nil, err
 	}
 	return p.(*WebPayIn), nil
+}
+
+func (m *MangoPay) NewBankwireDirectPayIn(author Consumer, credited *Wallet, amount, fees Money) (*BankwireDirectPayIn, error) {
+	const errorPrefix = "mango.MangoPay.NewBankwireDirectPayIn: "
+	if author == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'author' is nil")
+	}
+	if credited == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'credited' is nil")
+	}
+	authorId := consumerId(author)
+	if authorId == "" {
+		return nil, errors.New(errorPrefix + "'author' has empty Id")
+	}
+
+	p := &BankwireDirectPayIn{
+		PayIn: PayIn{
+			AuthorId:         authorId,
+			CreditedWalletId: credited.Id,
+			service:          m,
+		},
+		DeclaredDebitedFunds: amount,
+		DeclaredFees:         fees,
+	}
+	return p, nil
+}
+
+type BankwireDirectPayIn struct {
+	PayIn
+	DeclaredDebitedFunds Money
+	DeclaredFees         Money
+	WireReference        string            `json:",omitempty"`
+	BankAccount          map[string]string `json:",omitempty"`
+}
+
+func (p *BankwireDirectPayIn) String() string {
+	return struct2string(p)
+}
+
+func (t *BankwireDirectPayIn) Save() error {
+	data := JsonObject{}
+	j, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(j, &data); err != nil {
+		return err
+	}
+
+	// Force float64 to int conversion after unmarshalling.
+	for _, field := range []string{"CreationDate", "ExecutionDate"} {
+		data[field] = int(data[field].(float64))
+	}
+
+	// Fields not allowed when creating a tranfer.
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"CreditedUserId", "ResultCode", "ResultMessage", "Status", "ExecutionType",
+		"PaymentType", "SecureMode", "Type", "Nature", "DebitedFunds", "Fees"} {
+
+		delete(data, field)
+	}
+
+	tr, err := t.service.anyRequest(new(BankwireDirectPayIn), actionCreateBankwireDirectPayIn, data)
+	if err != nil {
+		return err
+	}
+	serv := t.service
+	*t = *(tr.(*BankwireDirectPayIn))
+	t.service = serv
+	t.PayIn.service = serv
+
+	if t.Status == "FAILED" {
+		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
+	}
+	return nil
+}
+
+func (m *MangoPay) NewDirectDebitWebPayIn(author Consumer, credited *Wallet, amount, fees Money, returnURL, directDebitType, culture string) (*DirectDebitWebPayIn, error) {
+	const errorPrefix = "mango.MangoPay.NewDirectDebitWebPayIn: "
+	if author == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'author' is nil")
+	}
+	if credited == nil {
+		return nil, errors.New(errorPrefix + "Parameter 'credited' is nil")
+	}
+	authorId := consumerId(author)
+	if authorId == "" {
+		return nil, errors.New(errorPrefix + "'author' has empty Id")
+	}
+	if returnURL == "" {
+		return nil, errors.New(errorPrefix + "Parameter 'returnURL' is empty")
+	}
+	if directDebitType == "" {
+		return nil, errors.New(errorPrefix + "Parameter 'directDebitType' is empty")
+	}
+	if culture == "" {
+		return nil, errors.New(errorPrefix + "Parameter 'culture' is empty")
+	}
+
+	p := &DirectDebitWebPayIn{
+		PayIn: PayIn{
+			AuthorId:         authorId,
+			DebitedFunds:     amount,
+			Fees:             fees,
+			CreditedWalletId: credited.Id,
+			service:          m,
+		},
+		ReturnURL:       returnURL,
+		DirectDebitType: directDebitType,
+		Culture:         culture,
+	}
+	return p, nil
+}
+
+type DirectDebitWebPayIn struct {
+	PayIn
+	RedirectURL        string `json:,omitempty`
+	ReturnURL          string
+	DirectDebitType    string
+	Culture            string
+	TemplateURLOptions *TemplateUrlOptions `json:",omitempty"`
+	TemplateURL        string              `json:",omitempty"`
+}
+
+func (p *DirectDebitWebPayIn) String() string {
+	return struct2string(p)
+}
+
+func (t *DirectDebitWebPayIn) Save() error {
+	data := JsonObject{}
+	j, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(j, &data); err != nil {
+		return err
+	}
+
+	// Force float64 to int conversion after unmarshalling.
+	for _, field := range []string{"CreationDate", "ExecutionDate"} {
+		data[field] = int(data[field].(float64))
+	}
+
+	// Fields not allowed when creating a tranfer.
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"CreditedUserId", "ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType",
+		"SecureMode", "Type", "Nature"} {
+
+		delete(data, field)
+	}
+
+	tr, err := t.service.anyRequest(new(DirectDebitWebPayIn), actionCreateDirectDebitWebPayIn, data)
+	if err != nil {
+		return err
+	}
+	serv := t.service
+	*t = *(tr.(*DirectDebitWebPayIn))
+	t.PayIn.service = serv
+
+	if t.Status == "FAILED" {
+		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
+	}
+	return nil
 }

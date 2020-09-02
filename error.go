@@ -17,4 +17,12 @@ const (
 	// Generic transaction errors
 	ErrUserNotCompleteTransaction = "101001"
 	ErrTransactionCancelledByUser = "101002"
+	ErrTransactionAmountTooHigh   = "001011"
+
+	// 3DSecure errors
+	Err3DSNotAvailable         = "101399"
+	Err3DSSessionExpired       = "101304"
+	Err3DSCardNotCompatible    = "101303"
+	Err3DSCardNotEnrolled      = "101302"
+	Err3DSAuthenticationFailed = "101301"
 )

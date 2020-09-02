@@ -108,11 +108,11 @@ func (b *BankAccount) Save() error {
 	ignore := []string{"Id", "CreationDate"}
 	switch b.atype {
 	case IBAN:
-		if b.IBAN == "" || b.BIC == "" {
+		if b.IBAN == "" {
 			return errors.New("missing full IBAN information")
 		}
 		ignore = append(ignore, "AccountNumber", "SortCode", "ABA", "BankName",
-			"InstitutionNumber", "BranchCode", "Country")
+			"InstitutionNumber", "BranchCode", "Country", "BIC")
 	case GB:
 		if b.AccountNumber == "" || b.SortCode == "" {
 			return errors.New("missing full GB information")
@@ -132,11 +132,11 @@ func (b *BankAccount) Save() error {
 		}
 		ignore = append(ignore, "IBAN", "BIC", "SortCode", "ABA", "Country")
 	case OTHER:
-		if b.AccountNumber == "" || b.BIC == "" {
+		if b.AccountNumber == "" {
 			return errors.New("missing full OTHER information")
 		}
 		ignore = append(ignore, "IBAN", "ABA", "SortCode", "BankName",
-			"InstitutionNumber", "BranchCode")
+			"InstitutionNumber", "BranchCode", "BIC")
 	}
 
 	for _, field := range ignore {

@@ -124,5 +124,7 @@ func (m *MangoPay) LegalUser(id string) (*LegalUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ins.(*LegalUser), nil
+	lu := ins.(*LegalUser)
+	lu.service = m
+	return lu, nil
 }

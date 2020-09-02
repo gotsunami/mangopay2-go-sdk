@@ -52,11 +52,7 @@ var rootURLs = map[ExecEnvironment]string{
 // The default HTTP client to use with the MangoPay api.
 var DefaultClient = &http.Client{
 	Transport: &http.Transport{
-		// Use TLS 1.1 as maximum version acceptable. TLS 1.2 (which is the
-		// default used if not specified) seems no more supported by MangoPay
-		// servers (used to be working though). Using TLS 1.2 results in
-		// "connection reset by peer" errors.
-		TLSClientConfig: &tls.Config{MaxVersion: tls.VersionTLS11},
+		TLSClientConfig: &tls.Config{MaxVersion: tls.VersionTLS12},
 	},
 }
 
@@ -86,6 +82,16 @@ type ProcessReply struct {
 	ResultCode    string
 	ResultMessage string
 	ExecutionDate int64
+}
+
+type HTTPError struct {
+	Code    int
+	Message string
+	Details map[string]interface{}
+}
+
+func (e HTTPError) Error() string {
+	return fmt.Sprintf("Code: %s, Message: %s, Details: %s", e.Code, e.Message, e.Details)
 }
 
 // NewMangoPay creates a suitable environment for accessing
@@ -128,7 +134,7 @@ func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, err
 	path := mr.Path
 	if mr.PathValues != nil {
 		// Substitute path variables, if any
-		for name, _ := range mr.PathValues {
+		for name := range mr.PathValues {
 			if _, ok := data[name]; !ok {
 				return nil, errors.New(fmt.Sprintf("missing keyword %s", name))
 			}
@@ -193,25 +199,29 @@ func (s *MangoPay) rawRequest(method, contentType string, uri string, body []byt
 	}
 
 	// Send request
-	resp, err := DefaultClient.Do(req)
+	resp, err := NewDefaultHTTPClientRetryWrap(DefaultClient).do(req)
 
-	// Handle reponse status code
-	if err == nil && resp.StatusCode != http.StatusOK {
+	// Handle response status code
+	if err == nil && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		j := JsonObject{}
 		err = s.unMarshalJSONResponse(resp, &j)
 		if err != nil {
 			return nil, err
 		}
-		errmsg := ""
+		HTTPErr := HTTPError{
+			Code: resp.StatusCode,
+		}
 		if msg, ok := j["Message"]; ok {
-			errmsg = fmt.Sprintf("Status %d: %s", resp.StatusCode, msg.(string))
+			HTTPErr.Message = msg.(string)
 		} else {
-			errmsg = fmt.Sprintf("Status %d; body: '%s'", resp.StatusCode, j)
+			HTTPErr.Message = fmt.Sprintf("Response body: '%s'", j)
 		}
-		if private, ok := j["errors"]; ok {
-			errmsg += fmt.Sprintf("(details :%v)", private)
+		if details, ok := j["errors"]; ok {
+			if HTTPErr.Details, ok = details.(map[string]interface{}); !ok {
+				HTTPErr.Details = map[string]interface{}{"Error": "Error details returned is not map[string]interface{}"}
+			}
 		}
-		err = errors.New(errmsg)
+		err = HTTPErr
 	}
 	return resp, err
 }
@@ -238,7 +248,7 @@ func (m *MangoPay) unMarshalJSONResponse(resp *http.Response, v interface{}) err
 		fmt.Println("<<<<<<<<<<<<<<<<<<<<<< DEBUG RESPONSE")
 	}
 	if err := json.Unmarshal(b, v); err != nil {
-		return err
+		return errors.New(fmt.Sprintf("error: %s, Mangopay server response: %s", err.Error(), string(b)))
 	}
 	return nil
 }
@@ -248,6 +258,9 @@ func (m *MangoPay) anyRequest(o interface{}, action mangoAction, data JsonObject
 	resp, err := m.request(action, data)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
 	}
 
 	t := reflect.TypeOf(o)
