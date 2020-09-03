@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	testIBAN = "FR3020041010124530725S03383"
-	testBIC  = "CRLYFRPP"
+	testIBAN = "DE46500105179417274631"
+	testBIC  = "BINAADAD"
 )
 
 func TestBankAccount_Save(test *testing.T) {
