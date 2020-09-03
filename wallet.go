@@ -27,7 +27,7 @@ func (b Money) String() string {
 	return fmt.Sprintf("%.2f %s", float64(b.Amount)/100, b.Currency)
 }
 
-// Wallet stores all payins and tranfers from users in order to
+// Wallet stores all payins and transfers from users in order to
 // collect money.
 type Wallet struct {
 	ProcessIdent

@@ -124,7 +124,7 @@ func (m *MangoPay) Option(opts ...option) {
 }
 
 // request prepares and sends a well formatted HTTP request to the
-// mangopay service.
+// Mangopay service.
 func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, error) {
 	mr, ok := mangoRequests[ma]
 	if !ok {
