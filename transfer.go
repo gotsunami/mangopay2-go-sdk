@@ -91,7 +91,7 @@ func (t *Transfer) Refund() (*Refund, error) {
 
 // Save sends an HTTP query to create a transfer. Upon successful creation,
 // it may return an ErrTransferFailed error if the transaction has been
-// rejected (unsufficient wallet balance for example).
+// rejected (insufficient wallet balance for example).
 func (t *Transfer) Save() error {
 	data := JsonObject{}
 	j, err := json.Marshal(t)

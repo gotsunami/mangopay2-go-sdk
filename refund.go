@@ -77,7 +77,7 @@ func (r *Refund) save() error {
 		data[field] = int(data[field].(float64))
 	}
 
-	// Fields not allowed when creating a tranfer.
+	// Fields not allowed when creating a transfer.
 	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds", "CreditedUserId", "ResultCode", "ResultMessage", "Status", "Fees", "InitialTransactionType", "InitialTransactionId", "DebitedFunds", "Nature", "DebitedWalletId", "CreditedWalletId", "Type"} {
 		delete(data, field)
 	}
@@ -107,7 +107,7 @@ func (r *Refund) save() error {
 	return nil
 }
 
-// Refund fetches a refund (tranfer or payin).
+// Refund fetches a refund (transfer or payin).
 func (m *MangoPay) Refund(id string) (*Refund, error) {
 	any, err := m.anyRequest(new(Refund), actionFetchRefund, JsonObject{"Id": id})
 	if err != nil {

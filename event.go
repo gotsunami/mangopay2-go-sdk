@@ -29,7 +29,7 @@ func NewEventFromRequest(req *http.Request) (*Event, error) {
 
 // See http://docs.mangopay.com/api-references/events/.
 
-// An event ressource.
+// An event resource.
 type Event struct {
 	ResourceId string    `json:"RessourceId"` // ReSSource - Mistake in MangoPay API
 	Type       EventType `json:"EventType"`

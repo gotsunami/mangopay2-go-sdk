@@ -52,6 +52,7 @@ var rootURLs = map[ExecEnvironment]string{
 // The default HTTP client to use with the MangoPay api.
 var DefaultClient = &http.Client{
 	Transport: &http.Transport{
+		// Note: TLS 1.1 will no longer supported by Mangopay API
 		TLSClientConfig: &tls.Config{MaxVersion: tls.VersionTLS12},
 	},
 }
@@ -91,7 +92,7 @@ type HTTPError struct {
 }
 
 func (e HTTPError) Error() string {
-	return fmt.Sprintf("Code: %s, Message: %s, Details: %s", e.Code, e.Message, e.Details)
+	return fmt.Sprintf("Code: %d, Message: %s, Details: %s", e.Code, e.Message, e.Details)
 }
 
 // NewMangoPay creates a suitable environment for accessing
@@ -123,7 +124,7 @@ func (m *MangoPay) Option(opts ...option) {
 }
 
 // request prepares and sends a well formatted HTTP request to the
-// mangopay service.
+// Mangopay service.
 func (s *MangoPay) request(ma mangoAction, data JsonObject) (*http.Response, error) {
 	mr, ok := mangoRequests[ma]
 	if !ok {
