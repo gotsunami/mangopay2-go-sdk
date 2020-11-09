@@ -66,6 +66,7 @@ const (
 	EventKycSucceeded                             = "KYC_SUCCEEDED"
 	EventKycFailed                                = "KYC_FAILED"
 	EventKycValidationAsked                       = "KYC_VALIDATION_ASKED"
+	EventKycOutdated                              = "KYC_OUTDATED"
 	EventDisputeDocumentCreated                   = "DISPUTE_DOCUMENT_CREATED"
 	EventDisputeDocumentValidationAsked           = "DISPUTE_DOCUMENT_VALIDATION_ASKED"
 	EventDisputeDocumentSucceeded                 = "DISPUTE_DOCUMENT_SUCCEEDED"

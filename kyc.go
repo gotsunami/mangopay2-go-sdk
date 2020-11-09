@@ -22,6 +22,7 @@ const (
 	DocumentStatusValidationAsked DocumentStatus = "VALIDATION_ASKED"
 	DocumentStatusValidated       DocumentStatus = "VALIDATED"
 	DocumentStatusRefused         DocumentStatus = "REFUSED"
+	DocumentStatusOutOfDate       DocumentStatus = "OUT_OF_DATE"
 )
 
 type DocumentRefusedReasonType string
