@@ -244,7 +244,7 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 		return nil, errors.New(msg + "empty return url")
 	}
 
-	var	authorID, creditedUserID string
+	var authorID, creditedUserID string
 	authorID = consumerId(from)
 	if to != nil {
 		creditedUserID = consumerId(to)
@@ -508,6 +508,137 @@ func (t *DirectDebitWebPayIn) Save() error {
 
 	if t.Status == "FAILED" {
 		return &ErrPayInFailed{t.Id, t.ResultMessage, t.ResultCode}
+	}
+	return nil
+}
+
+type DirectDebitDirectPayIn struct {
+	PayIn
+	MandateID           string
+	StatementDescriptor string
+}
+
+// NewDirectPayIn creates a direct payment from a tokenized credit card.
+//
+//  - from     : AuthorId value
+//  - to       : CreditedUserId value (optional, defaults to dst owner)
+//  - src      : CardId value
+//  - dst      : CreditedWalletId value
+//  - amount   : DebitedFunds value
+//  - fees     : Fees value
+//  - returnUrl: SecureModeReturnUrl value
+//
+// See http://docs.mangopay.com/api-references/payins/payindirectcard/
+// func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amount, fees Money, returnUrl string) (*DirectPayIn, error) {
+// 	msg := "new direct payIn: "
+// 	ps := []struct {
+// 		i   interface{}
+// 		msg string
+// 	}{
+// 		{from, "from parameter"},
+// 		{src, "card"},
+// 		{dst, "wallet"},
+// 	}
+// 	for _, p := range ps {
+// 		if p.i == nil {
+// 			return nil, errors.New(msg + p.msg)
+// 		}
+// 	}
+// 	if returnUrl == "" {
+// 		return nil, errors.New(msg + "empty return url")
+// 	}
+
+// 	var	authorID, creditedUserID string
+// 	authorID = consumerId(from)
+// 	if to != nil {
+// 		creditedUserID = consumerId(to)
+// 	}
+
+// 	// Check Ids
+// 	for _, i := range []struct{ v, msg string }{
+// 		{authorID, "from consumer"},
+// 		{dst.Id, "wallet"},
+// 		{src.Id, "card"},
+// 	} {
+// 		if i.v == "" {
+// 			return nil, errors.New(fmt.Sprintf("empty %s id", i.msg))
+// 		}
+// 	}
+
+// 	u, err := url.Parse(returnUrl)
+// 	if err != nil {
+// 		return nil, errors.New(msg + err.Error())
+// 	}
+// 	p := &DirectPayIn{
+// 		PayIn: PayIn{
+// 			AuthorId:         authorID,
+// 			CreditedUserId:   creditedUserID,
+// 			DebitedFunds:     amount,
+// 			Fees:             fees,
+// 			CreditedWalletId: dst.Id,
+// 			service:          m,
+// 		},
+// 		SecureModeReturnUrl: u.String(),
+// 		CardId:              src.Id,
+// 	}
+// 	p.service = m
+// 	return p, nil
+// }
+func (m *MangoPay) NewDirectDebitDirectPayIn(from, to Consumer, dst *Wallet, amount, fees Money, mandateID string) (*DirectDebitDirectPayIn, error) {
+	authorID := consumerId(from)
+	var creditedUserID string
+	if to != nil {
+		creditedUserID = consumerId(to)
+	}
+	p := &DirectDebitDirectPayIn{
+		PayIn: PayIn{
+			AuthorId:         authorID,
+			CreditedUserId:   creditedUserID,
+			DebitedFunds:     amount,
+			Fees:             fees,
+			CreditedWalletId: dst.Id,
+			service:          m,
+		},
+		MandateID: mandateID,
+	}
+
+	return p, nil
+}
+
+func (p *DirectDebitDirectPayIn) Save() error {
+	data := JsonObject{}
+	j, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(j, &data); err != nil {
+		return err
+	}
+
+	// Force float64 to int conversion after unmarshalling.
+	for _, field := range []string{"CreationDate", "ExecutionDate"} {
+		data[field] = int(data[field].(float64))
+	}
+
+	// Fields not allowed when creating a tranfer.
+	for _, field := range []string{"Id", "CreationDate", "ExecutionDate", "CreditedFunds",
+		"ResultCode", "ResultMessage", "Status", "ExecutionType", "PaymentType",
+		"SecureMode", "DebitedWalletId", "Type", "Nature"} {
+
+		delete(data, field)
+	}
+
+	tr, err := p.service.anyRequest(new(DirectDebitDirectPayIn), actionCreateDirectDebitDirectPayIn, data)
+	if err != nil {
+		return err
+	}
+	serv := p.service
+	*p = *(tr.(*DirectDebitDirectPayIn))
+	p.service = serv
+	p.PayIn.service = serv
+
+	if p.Status == "FAILED" {
+		return &ErrPayInFailed{p.Id, p.ResultMessage, p.ResultCode}
 	}
 	return nil
 }

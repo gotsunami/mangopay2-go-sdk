@@ -37,11 +37,14 @@ const (
 	actionCreateDirectPayIn
 	actionCreateBankwireDirectPayIn
 	actionCreateDirectDebitWebPayIn
+	actionCreateDirectDebitDirectPayIn
 
 	actionCreateCardRegistration
 	actionSendCardRegistrationData
 
 	actionFetchCard
+
+	actionFetchMandate
 
 	actionCreateTransferRefund
 	actionCreatePayInRefund
@@ -189,6 +192,11 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	actionCreateDirectDebitWebPayIn: {
 		"POST",
 		"/payins/directdebit/web",
+		nil,
+	},
+	actionCreateDirectDebitDirectPayIn: {
+		"POST",
+		"/payins/directdebit/direct",
 		nil,
 	},
 	actionCreateCardRegistration: {
