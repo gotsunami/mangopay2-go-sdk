@@ -214,6 +214,11 @@ var mangoRequests = map[mangoAction]mangoRequest{
 		"/cards/{{Id}}",
 		JsonObject{"Id": ""},
 	},
+	actionFetchMandate: {
+		"GET",
+		"/mandates/{{Id}}",
+		JsonObject{"Id": ""},
+	},
 	actionCreateTransferRefund: {
 		"POST",
 		"/transfers/{{TransferId}}/refunds",
