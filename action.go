@@ -281,8 +281,8 @@ var mangoRequests = map[mangoAction]mangoRequest{
 	},
 	actionFetchUserKYCDocuments: {
 		"GET",
-		"/users/{{UserId}}/kyc/documents",
-		JsonObject{"UserId": ""},
+		"/users/{{UserId}}/kyc/documents?status={{Status}}",
+		JsonObject{"UserId": "", "Status": ""},
 	},
 	actionFetchAllKYCDocuments: {
 		"GET",

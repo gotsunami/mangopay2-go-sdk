@@ -69,7 +69,7 @@ func (m *MangoPay) NewDocument(user Consumer, docType DocumentType, tag string) 
 	return casted, nil
 }
 
-func (m *MangoPay) Documents(user Consumer) (DocumentList, error) {
+func (m *MangoPay) Documents(user Consumer, status DocumentStatus) (DocumentList, error) {
 	data := JsonObject{}
 	action := actionFetchAllKYCDocuments
 	if user != nil {
@@ -78,6 +78,7 @@ func (m *MangoPay) Documents(user Consumer) (DocumentList, error) {
 			return nil, errors.New("user has empty Id")
 		}
 		data["UserId"] = id
+		data["Status"] = status
 		action = actionFetchUserKYCDocuments
 	}
 
