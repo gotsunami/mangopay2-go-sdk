@@ -105,6 +105,18 @@ func (p *PayIn) String() string {
 	return struct2string(p)
 }
 
+type BrowserInfo struct {
+	AcceptHeader      string
+	JavaEnabled       bool
+	Language          string
+	ColorDepth        int
+	ScreenHeight      int
+	ScreenWidth       int
+	TimeZoneOffset    string
+	UserAgent         string
+	JavascriptEnabled bool
+}
+
 // DirectPayIn is used to process a payment with registered (tokenized) cards.
 type DirectPayIn struct {
 	PayIn
@@ -113,6 +125,8 @@ type DirectPayIn struct {
 	CardId                string
 	DebitedWalletId       string
 	service               *MangoPay
+	IpAddress             string
+	BrowserInfo           BrowserInfo
 }
 
 func (p *DirectPayIn) String() string {
@@ -225,7 +239,17 @@ func (t *WebPayIn) Save() error {
 //  - returnUrl: SecureModeReturnUrl value
 //
 // See http://docs.mangopay.com/api-references/payins/payindirectcard/
-func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amount, fees Money, returnUrl string) (*DirectPayIn, error) {
+func (m *MangoPay) NewDirectPayIn(
+	from Consumer,
+	to Consumer,
+	src *Card,
+	dst *Wallet,
+	amount Money,
+	fees Money,
+	returnUrl string,
+	IpAddress string,
+	BrowserInfo BrowserInfo,
+) (*DirectPayIn, error) {
 	msg := "new direct payIn: "
 	ps := []struct {
 		i   interface{}
@@ -276,6 +300,8 @@ func (m *MangoPay) NewDirectPayIn(from, to Consumer, src *Card, dst *Wallet, amo
 		},
 		SecureModeReturnUrl: u.String(),
 		CardId:              src.Id,
+		IpAddress:           IpAddress,
+		BrowserInfo:         BrowserInfo,
 	}
 	p.service = m
 	return p, nil
