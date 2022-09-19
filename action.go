@@ -50,6 +50,10 @@ const (
 	actionCreateBankAccount
 	actionFetchBankAccount
 
+	actionCreateBankingAlias
+	actionFetchBankingAlias
+	actionFetchBankingAliases
+
 	actionCreatePayOut
 	actionFetchPayOut
 
@@ -235,6 +239,21 @@ var mangoRequests = map[mangoAction]mangoRequest{
 		"GET",
 		"/users/{{Id}}/bankaccounts",
 		JsonObject{"Id": ""},
+	},
+	actionCreateBankingAlias: {
+		"POST",
+		"/wallets/{{WalletId}}/bankingaliases/iban/",
+		JsonObject{"WalletId": ""},
+	},
+	actionFetchBankingAlias: {
+		"GET",
+		"/bankingaliases/{{BankingAliasId}}/",
+		JsonObject{"BankingAliasId": ""},
+	},
+	actionFetchBankingAliases: {
+		"GET",
+		"/wallets/{{WalletId}}/bankingaliases/",
+		JsonObject{"WalletId": ""},
 	},
 	actionCreatePayOut: {
 		"POST",
