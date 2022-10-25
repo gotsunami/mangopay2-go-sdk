@@ -13,6 +13,7 @@ type LegalUser struct {
 	User
 	Name                                  string
 	LegalPersonType                       string
+	UserCategory                          string
 	HeadquartersAddress                   string
 	LegalRepresentativeFirstName          string
 	LegalRepresentativeLastName           string
@@ -24,6 +25,8 @@ type LegalUser struct {
 	Statute                               string
 	ProofOfRegistration                   string
 	ShareholderDeclaration                string
+	CompanyNumber                         string
+	TermsAndConditionsAccepted            bool
 	service                               *MangoPay // Current service
 	wallets                               WalletList
 }
@@ -33,15 +36,20 @@ func (u *LegalUser) String() string {
 }
 
 // NewLegalUser creates a new legal user.
-func (m *MangoPay) NewLegalUser(name string, email string, personType string, legalFirstName, legalLastName string, birthday int64, nationality string, country string) *LegalUser {
+func (m *MangoPay) NewLegalUser(name string, email string, userCategory string, address string, companyNumber string, personType string, legalFirstName string, legalLastName string, birthday int64, nationality string, country string, terms bool) *LegalUser {
 	u := &LegalUser{
 		Name:                                  name,
+		UserCategory:                          userCategory,
+		HeadquartersAddress:                   address,
+		CompanyNumber:                         companyNumber,
 		LegalPersonType:                       personType,
 		LegalRepresentativeFirstName:          legalFirstName,
 		LegalRepresentativeLastName:           legalLastName,
 		LegalRepresentativeBirthday:           birthday,
 		LegalRepresentativeNationality:        nationality,
-		LegalRepresentativeCountryOfResidence: country}
+		LegalRepresentativeCountryOfResidence: country,
+		TermsAndConditionsAccepted:            terms,
+	}
 	u.User = User{Email: email}
 	u.service = m
 	return u
