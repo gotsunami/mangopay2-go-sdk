@@ -19,8 +19,8 @@ func TestNaturalUserSave(test *testing.T) {
 }
 
 func createTestUser(serv *MangoPay) *NaturalUser {
-	user := serv.NewNaturalUser("Sergey", "Yarmonov", "sergey.yarmonov@gmail.com",
-		time.Date(1988, time.January, 18, 0, 0, 0, 0, time.UTC).Unix(), "DE", "DE")
+	user := serv.NewNaturalUser("Sergey", "Yarmonov", "sergey.yarmonov@gmail.com", "cat",
+		time.Date(1988, time.January, 18, 0, 0, 0, 0, time.UTC).Unix(), "DE", "DE", true)
 	user.IncomeRange = 3
 	return user
 }
