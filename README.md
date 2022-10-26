@@ -13,7 +13,7 @@ $ go get github.com/gotsunami/mangopay2-go-sdk
 
 A command line tool is also available for testing the MangoPay service easily:
 ```bash
-$ go install github.com/gotsunami/mangopay2-go-sdk/cmd/mangopay@latest
+$ go install github.com/gotsunami/mangopay2-go-sdk/cmd/mangopay@v2.01
 ```
 
 Before using it, you must fill a JSON config file with your client credentials ([get your sandbox environment credentials](http://docs.mangopay.com/api-references/sandbox-credentials/)):
