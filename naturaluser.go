@@ -11,17 +11,19 @@ import (
 // NaturalUser describes all the properties of a MangoPay natural user object.
 type NaturalUser struct {
 	User
-	FirstName, LastName string
-	Address             string
-	Birthday            int64
-	Nationality         string
-	CountryOfResidence  string
-	Occupation          string
-	IncomeRange         int
-	ProofOfIdentity     string
-	ProofOfAddress      string
-	service             *MangoPay // Current service
-	wallets             WalletList
+	FirstName, LastName        string
+	Address                    string
+	UserCategory               string
+	TermsAndConditionsAccepted bool
+	Birthday                   int64
+	Nationality                string
+	CountryOfResidence         string
+	Occupation                 string
+	IncomeRange                int
+	ProofOfIdentity            string
+	ProofOfAddress             string
+	service                    *MangoPay // Current service
+	wallets                    WalletList
 }
 
 func (u *NaturalUser) String() string {
@@ -29,13 +31,15 @@ func (u *NaturalUser) String() string {
 }
 
 // NewNaturalUser creates a new natural user.
-func (m *MangoPay) NewNaturalUser(first, last string, email string, birthday int64, nationality, country string) *NaturalUser {
+func (m *MangoPay) NewNaturalUser(first, last string, email string, userCategory string, birthday int64, nationality, country string, terms bool) *NaturalUser {
 	u := &NaturalUser{
-		FirstName:          first,
-		LastName:           last,
-		Birthday:           birthday,
-		Nationality:        nationality,
-		CountryOfResidence: country,
+		FirstName:                  first,
+		LastName:                   last,
+		UserCategory:               userCategory,
+		TermsAndConditionsAccepted: terms,
+		Birthday:                   birthday,
+		Nationality:                nationality,
+		CountryOfResidence:         country,
 	}
 	u.User = User{Email: email}
 	u.service = m

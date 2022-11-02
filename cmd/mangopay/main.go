@@ -18,7 +18,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gotsunami/mangopay2-go-sdk"
+	mango "github.com/gotsunami/mangopay2-go-sdk"
 )
 
 func perror(msg string) {
@@ -34,7 +34,8 @@ func perror(msg string) {
 // through an HTML form to the CardRegistrationUrl (which is an external banking
 // service).
 func sendRegistrationData(c *mango.CardRegistration, cardNumber,
-	expirationDate, cvx string) (string, error) {
+	expirationDate, cvx string,
+) (string, error) {
 	data := url.Values{
 		"data":               []string{c.PreregistrationData},
 		"accessKeyRef":       []string{c.AccessKey},
@@ -175,7 +176,8 @@ Options:
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		n := service.NewNaturalUser(u.FirstName, u.LastName, u.Email, u.Birthday, u.Nationality, u.CountryOfResidence)
+		n := service.NewNaturalUser(u.FirstName, u.LastName, u.Email, u.UserCategory, u.Birthday, u.Nationality,
+			u.CountryOfResidence, u.TermsAndConditionsAccepted)
 		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
@@ -186,7 +188,8 @@ Options:
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		n := service.NewNaturalUser(u.FirstName, u.LastName, u.Email, u.Birthday, u.Nationality, u.CountryOfResidence)
+		n := service.NewNaturalUser(u.FirstName, u.LastName, u.Email, u.UserCategory, u.Birthday, u.Nationality,
+			u.CountryOfResidence, u.TermsAndConditionsAccepted)
 		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
@@ -203,12 +206,12 @@ Options:
 		}
 	case "natuser":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		u, err := service.NaturalUser(data.Id)
+		u, err := service.NaturalUser(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -218,7 +221,9 @@ Options:
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		n := service.NewLegalUser(u.Name, u.Email, u.LegalPersonType, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeBirthday, u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence)
+		n := service.NewLegalUser(u.Name, u.Email, u.UserCategory, u.LegalRepresentativeAddress, u.CompanyNumber,
+			u.LegalPersonType, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeBirthday,
+			u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence, u.TermsAndConditionsAccepted)
 		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
@@ -229,7 +234,9 @@ Options:
 		if err := json.Unmarshal([]byte(*post), u); err != nil {
 			perror(err.Error())
 		}
-		n := service.NewLegalUser(u.Name, u.Email, u.LegalPersonType, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeBirthday, u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence)
+		n := service.NewLegalUser(u.Name, u.Email, u.UserCategory, u.LegalRepresentativeAddress, u.CompanyNumber,
+			u.LegalPersonType, u.LegalRepresentativeFirstName, u.LegalRepresentativeLastName, u.LegalRepresentativeBirthday,
+			u.LegalRepresentativeNationality, u.LegalRepresentativeCountryOfResidence, u.TermsAndConditionsAccepted)
 		if err := n.Save(); err != nil {
 			perror(err.Error())
 		}
@@ -237,24 +244,24 @@ Options:
 		fmt.Println(n)
 	case "legaluser":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		u, err := service.LegalUser(data.Id)
+		u, err := service.LegalUser(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
 		fmt.Println(u)
 	case "user":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		u, err := service.User(data.Id)
+		u, err := service.User(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -281,12 +288,12 @@ Options:
 		fmt.Println(n)
 	case "wallet":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		w, err := service.Wallet(data.Id)
+		w, err := service.Wallet(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -313,12 +320,12 @@ Options:
 		fmt.Println(n)
 	case "trwallet":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		w, err := service.Wallet(data.Id)
+		w, err := service.Wallet(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -331,13 +338,13 @@ Options:
 		}
 	case "wallets":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
-		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.ID}}
 		ws, err := service.Wallets(u)
 		if err != nil {
 			perror(err.Error())
@@ -376,25 +383,25 @@ Options:
 		fmt.Println(k)
 	case "transfer":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		t, err := service.Transfer(data.Id)
+		t, err := service.Transfer(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
 		fmt.Println(t)
 	case "transfers":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
-		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.ID}}
 		trs, err := service.Transfers(u)
 		if err != nil {
 			perror(err.Error())
@@ -418,7 +425,7 @@ Options:
 			&mango.Wallet{
 				ProcessIdent: mango.ProcessIdent{Id: w.CreditedWalletId},
 			},
-			w.ReturnUrl, w.Culture, w.TemplateURLOptions)
+			w.ReturnUrl, w.CardType, w.Culture, w.TemplateURLOptions)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -432,12 +439,12 @@ Options:
 		fmt.Println(k)
 	case "payin":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		t, err := service.PayIn(data.Id)
+		t, err := service.PayIn(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -475,12 +482,12 @@ Options:
 		fmt.Println(card)
 	case "card":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		c, err := service.Card(data.Id)
+		c, err := service.Card(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -497,7 +504,7 @@ Options:
 		card := mango.Card{ProcessIdent: mango.ProcessIdent{Id: w.CardId}}
 		wallet := mango.Wallet{ProcessIdent: mango.ProcessIdent{Id: w.CreditedWalletId}}
 		k, err := service.NewDirectPayIn(from, to, &card, &wallet,
-			w.DebitedFunds, w.Fees, w.SecureModeReturnUrl)
+			w.DebitedFunds, w.Fees, w.SecureModeReturnUrl, "192.168.0.1", mango.BrowserInfo{})
 		if err != nil {
 			perror(err.Error())
 		}
@@ -511,13 +518,13 @@ Options:
 		fmt.Println(k)
 	case "cards":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
-		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.ID}}
 		cs, err := service.Cards(u)
 		if err != nil {
 			perror(err.Error())
@@ -547,12 +554,12 @@ Options:
 		fmt.Println(r)
 	case "refund":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		r, err := service.Refund(data.Id)
+		r, err := service.Refund(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
@@ -577,28 +584,28 @@ Options:
 		fmt.Println(acc)
 	case "account":
 		var data struct {
-			Id     string
-			UserId string
+			ID     string
+			UserID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
-		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.UserId}}
-		a, err := service.BankAccount(u, data.Id)
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.UserID}}
+		a, err := service.BankAccount(u, data.ID)
 		if err != nil {
 			perror(err.Error())
 		}
 		fmt.Println(a)
 	case "accounts":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
 		u := new(mango.LegalUser)
-		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.Id}}
+		u.User = mango.User{ProcessIdent: mango.ProcessIdent{Id: data.ID}}
 		accs, err := service.BankAccounts(u)
 		if err != nil {
 			perror(err.Error())
@@ -630,12 +637,12 @@ Options:
 		fmt.Println(pay)
 	case "payout":
 		var data struct {
-			Id string
+			ID string
 		}
 		if err := json.Unmarshal([]byte(*post), &data); err != nil {
 			perror(err.Error())
 		}
-		p, err := service.PayOut(data.Id)
+		p, err := service.PayOut(data.ID)
 		if err != nil {
 			perror(err.Error())
 		}

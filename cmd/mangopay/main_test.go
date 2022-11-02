@@ -9,12 +9,13 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/gotsunami/mangopay2-go-sdk"
 	"log"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	mango "github.com/gotsunami/mangopay2-go-sdk"
 )
 
 const (
@@ -37,6 +38,9 @@ type user struct {
 	email, country string
 	birthday       int64
 	ccn, cvv, exp  string // Credit card number, CVV, exp. date (MMYY)
+	category       string
+	nationality    string
+	terms          bool
 	wallet         *mango.Wallet
 	card           *mango.Card
 }
@@ -89,10 +93,14 @@ func init() {
 	birth2 = time.Now().Add(-25 * 24 * time.Hour * 365).Unix()
 
 	usersinfo = []user{
-		user{firstName1, lastName1, email1, country, birth1,
-			"4970101122334463", "123", "0219", nil, nil},
-		user{firstName2, lastName2, email2, country, birth2,
-			"4970101122334471", "123", "0919", nil, nil},
+		{
+			firstName1, lastName1, email1, country, birth1,
+			"4970101122334463", "123", "0219", "", "French", true, nil, nil,
+		},
+		{
+			firstName2, lastName2, email2, country, birth2,
+			"4970101122334471", "123", "0919", "", "English", true, nil, nil,
+		},
 	}
 	users = make([]*mango.NaturalUser, 2)
 }
@@ -100,8 +108,8 @@ func init() {
 func TestNewNaturalUser(t *testing.T) {
 	for k, u := range usersinfo {
 		log.Printf("Creating user %s ...", u.first)
-		users[k] = service.NewNaturalUser(u.first, u.last, u.email, u.birthday,
-			u.country, u.country)
+		users[k] = service.NewNaturalUser(u.first, u.last, u.email, u.category, u.birthday,
+			u.nationality, u.country, u.terms)
 		if err := users[k].Save(); err != nil {
 			t.Fatalf("can't create user: " + err.Error())
 		}
@@ -119,7 +127,7 @@ func TestFetchNaturalUser(t *testing.T) {
 }
 
 func TestNewWallet(t *testing.T) {
-	for k, _ := range usersinfo {
+	for k := range usersinfo {
 		u := users[k]
 		log.Printf("Creating wallet for %s ...", u.FirstName)
 		w, err := service.NewWallet(mango.ConsumerList{u}, u.FirstName+"'s wallet", currency)
@@ -169,10 +177,10 @@ func TestDirectPayin(t *testing.T) {
 	for k, u := range users {
 		log.Printf("Sending %d EUR to %s's wallet ... ", amount, u.FirstName)
 		p, err := service.NewDirectPayIn(u, u, usersinfo[k].card,
-			usersinfo[k].wallet, mango.Money{currency, amount * 100}, noFees,
-			"http://myreturnurl")
+			usersinfo[k].wallet, mango.Money{Currency: currency, Amount: amount * 100}, noFees,
+			"http://myreturnurl", "192.168.0.1", mango.BrowserInfo{})
 		if err != nil {
-			t.Fatal(err.Error)
+			t.Fatal(err)
 		}
 		if err := p.Save(); err != nil {
 			t.Fatal(err.Error())
@@ -182,7 +190,7 @@ func TestDirectPayin(t *testing.T) {
 			payin = &p.PayIn
 		}
 	}
-	for k, _ := range users {
+	for k := range users {
 		w, err := service.Wallet(usersinfo[k].wallet.Id)
 		if err != nil {
 			t.Fatal(err.Error())
@@ -197,8 +205,8 @@ func TestTransferBetweenWallets(t *testing.T) {
 	amount := 30
 	fees := 2
 	log.Printf("Alice pays %d EUR to Bob (%d EUR fees) ...", amount, fees)
-	tr, err := service.NewTransfer(users[0], mango.Money{currency, amount * 100},
-		mango.Money{currency, int(fees * 100)},
+	tr, err := service.NewTransfer(users[0], mango.Money{Currency: currency, Amount: amount * 100},
+		mango.Money{Currency: currency, Amount: int(fees * 100)},
 		usersinfo[0].wallet, usersinfo[1].wallet)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -214,7 +222,7 @@ func TestTransferBetweenWallets(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	if w.Balance.Amount != (10000 + 2800) {
-		t.Errorf("wrong Bob's wallet balance. Expect %.2f, got %.2f", 128, w.Balance.Amount)
+		t.Errorf("wrong Bob's wallet balance. Expect %d, got %d", 128, w.Balance.Amount)
 	}
 }
 
@@ -229,7 +237,7 @@ func TestTransferRefund(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	if w.Balance.Amount != 10000 {
-		t.Errorf("wrong Alice's wallet balance. Expect 100 EUR, got %.2f", w.Balance.Amount)
+		t.Errorf("wrong Alice's wallet balance. Expect 100 EUR, got %d", w.Balance.Amount)
 	}
 }
 
@@ -245,7 +253,7 @@ func TestPayInRefund(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	if w.Balance.Amount != 0 {
-		t.Errorf("wrong Bob's wallet balance. Expect 0 EUR, got %.2f", w.Balance.Amount)
+		t.Errorf("wrong Bob's wallet balance. Expect 0 EUR, got %d", w.Balance.Amount)
 	}
 }
 
